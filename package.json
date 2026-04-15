@@ -4,7 +4,10 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"start": "node dist/server.js",
+		"build": "tsc -p .",
+		"dev": "tsx watch src/server.ts",
+		"lint": "eslint ./src --ext .ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -14,8 +17,12 @@
 		"express": "^5.2.1"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/express": "^5.0.6",
 		"@types/node": "^25.6.0",
-		"typescript": "^6.0.2"
+		"eslint": "^10.2.0",
+		"tsx": "^4.21.0",
+		"typescript": "^6.0.2",
+		"typescript-eslint": "^8.58.2"
 	}
 }
