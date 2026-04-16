@@ -15,18 +15,7 @@ enum MediaType {
   SERIES
 }
 
-enum Platform {
-  NETFLIX
-  DISNEY_PLUS
-  HBO_MAX
-  AMAZON_PRIME
-  APPLE_TV
-  YOUTUBE
-  HULU
-  OTHER
-}
-
-enum Pricing {
+enum PricingType {
   FREE
   PREMIUM
 }

@@ -1,0 +1,40 @@
+model Review {
+  id         String       @id @default(uuid(7))
+  userId     String
+  movieId    String
+  rating     Int          @default(0)
+  content    String       @db.Text
+  hasSpoiler Boolean      @default(false)
+  status     ReviewStatus @default(PENDING)
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // relations
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie    Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  tags     ReviewTag[]
+  likes    ReviewLike[]
+  comments Comment[]
+
+  @@index([isDeleted], name: "idx_review_deleted")
+  @@index([status], name: "idx_review_status")
+  @@index([userId], name: "idx_review_user")
+  @@index([movieId], name: "idx_review_movie")
+  @@map("reviews")
+}
+
+model ReviewLike {
+  userId   String
+  reviewId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, reviewId])
+  @@map("review_likes")
+}

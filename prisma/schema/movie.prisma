@@ -1,0 +1,43 @@
+model Movie {
+  id           String      @id @default(uuid(7))
+  title        String      @db.VarChar(200)
+  synopsis     String      @db.Text
+  releaseYear  Int
+  director     String      @db.VarChar(100)
+  cast         String[]
+  posterImage  String?
+  trailerUrl   String?
+  streamingUrl String?
+  pricingType  PricingType @default(FREE)
+  rentPrice    Float       @default(0)
+  buyPrice     Float       @default(0)
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  genres     MovieGenre[]
+  platforms  MoviePlatform[]
+  reviews    Review[]
+  watchlists Watchlist[]
+
+  @@index([isDeleted], name: "idx_movie_deleted")
+  @@index([title], name: "idx_movie_title")
+  @@index([releaseYear], name: "idx_movie_release_year")
+  @@index([pricingType], name: "idx_movie_pricing_type")
+  @@map("movies")
+}
+
+model Watchlist {
+  userId  String
+  movieId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, movieId])
+  @@map("watchlists")
+}

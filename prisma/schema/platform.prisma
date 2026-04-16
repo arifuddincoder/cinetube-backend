@@ -1,0 +1,28 @@
+model Platform {
+  id      String  @id @default(uuid(7))
+  name    String  @unique @db.VarChar(100)
+  logo    String?
+  website String?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  movies MoviePlatform[]
+
+  @@index([isDeleted], name: "idx_platform_deleted")
+  @@index([name], name: "idx_platform_name")
+  @@map("platforms")
+}
+
+model MoviePlatform {
+  movieId    String
+  platformId String
+
+  movie    Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, platformId])
+  @@map("movie_platforms")
+}

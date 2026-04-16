@@ -4,10 +4,22 @@ model Tag {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  isDeleted   Boolean   @default(false)
+  isDeleted   Boolean     @default(false)
   deletedTime DateTime?
+  reviewTags  ReviewTag[]
 
   @@index([isDeleted], name: "idx_tag_deleted")
   @@index([name], name: "idx_tag_name")
   @@map("tags")
+}
+
+model ReviewTag {
+  reviewId String
+  tagId    String
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, tagId])
+  @@map("review_tags")
 }
