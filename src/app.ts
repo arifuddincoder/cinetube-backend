@@ -8,10 +8,12 @@ import { IndexRoutes } from "./app/routes";
 import qs from "qs";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
+import path from "path";
 
 const app: Application = express();
 app.set("query parser", (str: string) => qs.parse(str));
 app.set("view engine", "ejs");
+app.set("views", path.resolve(process.cwd(), "src/app/templates"));
 // Better Auth handler
 app.use("/api/auth", toNodeHandler(auth));
 
