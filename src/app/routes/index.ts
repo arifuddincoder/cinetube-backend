@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { AuthRoutes } from "../module/auth/auth.router";
+import { AuthRoutes } from "../module/auth/auth.route";
 import { AdminRoutes } from "../module/admin/admin.route";
+import { GenreRoutes } from "../module/genre/genre.route";
 
 const router = Router();
+
 router.use("/auth", AuthRoutes);
-router.use("/admin", AdminRoutes);
+router.use("/admins", AdminRoutes);
+router.use("/genres", GenreRoutes);
+
 export const IndexRoutes = router;
