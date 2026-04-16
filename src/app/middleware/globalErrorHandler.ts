@@ -71,7 +71,7 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
 		stack = err.stack;
 		errorSources = [
 			{
-				path: "",
+				path: req.originalUrl,
 				message: err.message,
 			},
 		];
@@ -81,7 +81,7 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
 		stack = err.stack;
 		errorSources = [
 			{
-				path: "",
+				path: req.originalUrl,
 				message: err.message,
 			},
 		];

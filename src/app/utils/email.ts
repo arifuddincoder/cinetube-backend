@@ -46,7 +46,10 @@ export const sendEmail = async ({ subject, templateData, templateName, to, attac
 			})),
 		});
 
-		console.log(`Email sent to ${to} : ${info.messageId}`);
+		if (envVars.NODE_ENV === "development") {
+			console.log("Email sent: %s", info.messageId);
+			console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+		}
 	} catch (error: any) {
 		console.log("Email Sending Error", error.message);
 		throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to send email");
