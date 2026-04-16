@@ -12,20 +12,6 @@ import {
 
 const router = Router();
 
-router.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), AdminController.getAllAdmins);
-router.get("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), AdminController.getAdminById);
-
-router.post(
-	"/",
-	checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
-	validateRequest(createAdminZodSchema),
-	AdminController.createAdmin,
-);
-
-router.patch("/:id", checkAuth(Role.SUPER_ADMIN), validateRequest(updateAdminZodSchema), AdminController.updateAdmin);
-
-router.delete("/:id", checkAuth(Role.SUPER_ADMIN), AdminController.deleteAdmin);
-
 router.patch(
 	"/change-user-status",
 	checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
@@ -39,5 +25,19 @@ router.patch(
 	validateRequest(changeUserRoleZodSchema),
 	AdminController.changeUserRole,
 );
+
+router.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), AdminController.getAllAdmins);
+router.get("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), AdminController.getAdminById);
+
+router.post(
+	"/",
+	checkAuth(Role.SUPER_ADMIN, Role.ADMIN),
+	validateRequest(createAdminZodSchema),
+	AdminController.createAdmin,
+);
+
+router.patch("/:id", checkAuth(Role.SUPER_ADMIN), validateRequest(updateAdminZodSchema), AdminController.updateAdmin);
+
+router.delete("/:id", checkAuth(Role.SUPER_ADMIN), AdminController.deleteAdmin);
 
 export const AdminRoutes = router;
