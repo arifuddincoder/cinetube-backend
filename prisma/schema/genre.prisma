@@ -1,0 +1,13 @@
+model Genre {
+  id        String   @id @default(uuid(7))
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isDeleted   Boolean   @default(false)
+  deletedTime DateTime?
+
+  @@index([isDeleted], name: "idx_genre_deleted")
+  @@index([name], name: "idx_genre_name")
+  @@map("genres")
+}
