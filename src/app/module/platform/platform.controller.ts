@@ -57,12 +57,13 @@ const updatePlatform = catchAsync(async (req: Request, res: Response) => {
 
 const deletePlatform = catchAsync(async (req: Request, res: Response) => {
 	const { id } = req.params;
-	await PlatformService.deletePlatform(id as string);
+	const result = await PlatformService.deletePlatform(id as string);
 
 	sendResponse(res, {
 		httpStatusCode: status.OK,
 		success: true,
 		message: "Platform deleted successfully",
+		data: result,
 	});
 });
 

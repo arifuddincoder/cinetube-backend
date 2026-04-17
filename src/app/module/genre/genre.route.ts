@@ -26,4 +26,6 @@ router.patch(
 
 router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), GenreController.deleteGenre);
 
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), GenreController.hardDeleteGenre);
+
 export const GenreRoutes = router;

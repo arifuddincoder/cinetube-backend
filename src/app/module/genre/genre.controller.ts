@@ -57,12 +57,25 @@ const updateGenre = catchAsync(async (req: Request, res: Response) => {
 
 const deleteGenre = catchAsync(async (req: Request, res: Response) => {
 	const { id } = req.params;
-	await GenreService.deleteGenre(id);
+	const result = await GenreService.deleteGenre(id as string);
 
 	sendResponse(res, {
 		httpStatusCode: status.OK,
 		success: true,
 		message: "Genre deleted successfully",
+		data: result,
+	});
+});
+
+const hardDeleteGenre = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await GenreService.hardDeleteGenre(id as string);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Genre permanently deleted successfully",
+		data: result,
 	});
 });
 
@@ -72,4 +85,5 @@ export const GenreController = {
 	createGenre,
 	updateGenre,
 	deleteGenre,
+	hardDeleteGenre,
 };

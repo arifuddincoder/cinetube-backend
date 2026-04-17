@@ -95,13 +95,14 @@ const deletePlatform = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Platform not found");
 	}
 
-	await prisma.platform.update({
+	const platform = await prisma.platform.update({
 		where: { id },
 		data: {
 			isDeleted: true,
 			deletedAt: new Date(),
 		},
 	});
+	return platform;
 };
 
 export const PlatformService = {

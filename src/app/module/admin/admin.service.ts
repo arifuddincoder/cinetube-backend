@@ -157,8 +157,7 @@ const deleteAdmin = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Admin not found");
 	}
 
-	// soft delete
-	await prisma.user.update({
+	const admin = await prisma.user.update({
 		where: { id },
 		data: {
 			isDeleted: true,
@@ -166,6 +165,7 @@ const deleteAdmin = async (id: string) => {
 			status: UserStatus.DELETED,
 		},
 	});
+	return admin;
 };
 
 const changeUserStatus = async (payload: IChangeUserStatusPayload) => {

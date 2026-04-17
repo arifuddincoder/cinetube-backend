@@ -91,14 +91,34 @@ const deleteGenre = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Genre not found");
 	}
 
-	// soft delete
-	await prisma.genre.update({
+	const genre = await prisma.genre.update({
 		where: { id },
 		data: {
 			isDeleted: true,
 			deletedTime: new Date(),
 		},
 	});
+	return genre;
+};
+
+const hardDeleteGenre = async (id: string) => {
+	const isGenreExist = await prisma.genre.findUnique({
+		where: { id },
+	});
+
+	if (!isGenreExist) {
+		throw new AppError(status.NOT_FOUND, "Genre not found");
+	}
+
+	if (!isGenreExist.isDeleted) {
+		throw new AppError(status.BAD_REQUEST, "Genre must be soft deleted before permanent deletion");
+	}
+
+	const genre = await prisma.genre.delete({
+		where: { id },
+	});
+
+	return genre;
 };
 
 export const GenreService = {
@@ -107,4 +127,5 @@ export const GenreService = {
 	createGenre,
 	updateGenre,
 	deleteGenre,
+	hardDeleteGenre,
 };
