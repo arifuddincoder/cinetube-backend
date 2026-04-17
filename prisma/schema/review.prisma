@@ -1,18 +1,18 @@
 model Review {
-  id         String       @id @default(uuid(7))
-  userId     String
-  movieId    String
-  rating     Int          @default(0)
-  content    String       @db.Text
-  hasSpoiler Boolean      @default(false)
-  status     ReviewStatus @default(PENDING)
+  id              String       @id @default(uuid(7))
+  userId          String
+  movieId         String
+  rating          Int          @default(0)
+  content         String       @db.Text
+  hasSpoiler      Boolean      @default(false)
+  status          ReviewStatus @default(PENDING)
+  unpublishReason String?      @db.Text
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  // relations
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   movie    Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
   tags     ReviewTag[]

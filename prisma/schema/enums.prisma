@@ -21,6 +21,7 @@ enum PricingType {
 }
 
 enum ReviewStatus {
+  DRAFT
   PENDING
   PUBLISHED
   UNPUBLISHED

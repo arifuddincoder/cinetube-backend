@@ -7,6 +7,7 @@ import { TagRoutes } from "../module/tag/tag.route";
 import { MovieRoutes } from "../module/movie/movie.route";
 import { CastMemberRoutes } from "../module/castMember/castMember.route";
 import { WatchlistRoutes } from "../module/watchlist/watchlist.route";
+import { ReviewRoutes } from "../module/review/review.route";
 
 const router = Router();
 
@@ -18,4 +19,5 @@ router.use("/tags", TagRoutes);
 router.use("/movies", MovieRoutes);
 router.use("/cast-members", CastMemberRoutes);
 router.use("/watchlist", WatchlistRoutes);
+router.use("/reviews", ReviewRoutes);
 export const IndexRoutes = router;
