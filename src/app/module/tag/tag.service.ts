@@ -101,11 +101,26 @@ const deleteTag = async (id: string) => {
 
 	return tags;
 };
+const hardDeleteTag = async (id: string) => {
+	const isTagExist = await prisma.tag.findUnique({
+		where: { id },
+	});
 
+	if (!isTagExist) {
+		throw new AppError(status.NOT_FOUND, "Tag not found");
+	}
+
+	const tag = await prisma.tag.delete({
+		where: { id },
+	});
+
+	return tag;
+};
 export const TagService = {
 	getAllTags,
 	getTagById,
 	createTag,
 	updateTag,
 	deleteTag,
+	hardDeleteTag,
 };

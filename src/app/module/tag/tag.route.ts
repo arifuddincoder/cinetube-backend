@@ -23,4 +23,6 @@ router.patch(
 
 router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), TagController.deleteTag);
 
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), TagController.hardDeleteTag);
+
 export const TagRoutes = router;

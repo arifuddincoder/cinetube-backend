@@ -104,11 +104,26 @@ const deletePlatform = async (id: string) => {
 	});
 	return platform;
 };
+const hardDeletePlatform = async (id: string) => {
+	const isPlatformExist = await prisma.platform.findUnique({
+		where: { id },
+	});
 
+	if (!isPlatformExist) {
+		throw new AppError(status.NOT_FOUND, "Platform not found");
+	}
+
+	const platform = await prisma.platform.delete({
+		where: { id },
+	});
+
+	return platform;
+};
 export const PlatformService = {
 	getAllPlatforms,
 	getPlatformById,
 	createPlatform,
 	updatePlatform,
 	deletePlatform,
+	hardDeletePlatform,
 };

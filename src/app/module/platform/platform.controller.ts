@@ -67,10 +67,23 @@ const deletePlatform = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const hardDeletePlatform = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await PlatformService.hardDeletePlatform(id as string);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Platform permanently deleted successfully",
+		data: result,
+	});
+});
+
 export const PlatformController = {
 	getAllPlatforms,
 	getPlatformById,
 	createPlatform,
 	updatePlatform,
 	deletePlatform,
+	hardDeletePlatform,
 };

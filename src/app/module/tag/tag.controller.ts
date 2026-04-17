@@ -67,10 +67,23 @@ const deleteTag = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const hardDeleteTag = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await TagService.hardDeleteTag(id as string);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Tag permanently deleted successfully",
+		data: result,
+	});
+});
+
 export const TagController = {
 	getAllTags,
 	getTagById,
 	createTag,
 	updateTag,
 	deleteTag,
+	hardDeleteTag,
 };

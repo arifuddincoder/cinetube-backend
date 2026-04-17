@@ -28,4 +28,6 @@ router.patch(
 
 router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), PlatformController.deletePlatform);
 
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), PlatformController.hardDeletePlatform);
+
 export const PlatformRoutes = router;
