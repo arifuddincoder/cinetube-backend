@@ -25,5 +25,5 @@ router.patch(
 );
 
 router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), CastMemberController.deleteCastMember);
-
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), CastMemberController.hardDeleteCastMember);
 export const CastMemberRoutes = router;

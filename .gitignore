@@ -8,3 +8,5 @@ dist
 
 /src/generated
 /generated/prisma
+
+/src/app/watchlist/*

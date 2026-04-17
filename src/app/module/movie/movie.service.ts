@@ -40,6 +40,11 @@ const getMovieById = async (id: string) => {
 					platform: true,
 				},
 			},
+			movieCasts: {
+				include: {
+					castMember: true,
+				},
+			},
 			reviews: {
 				where: {
 					isDeleted: false,
@@ -97,7 +102,6 @@ const getMovieById = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	// calculate average rating
 	const avgRating = await prisma.review.aggregate({
 		where: {
 			movieId: id,
@@ -120,9 +124,8 @@ const getMovieById = async (id: string) => {
 };
 
 const createMovie = async (payload: ICreateMoviePayload) => {
-	const { genreIds, platformIds, rentPrice = 0, buyPrice = 0, rentDuration = 7, ...movieData } = payload;
+	const { genreIds, platformIds, castMemberIds, rentPrice = 0, buyPrice = 0, rentDuration = 7, ...movieData } = payload;
 
-	// auto set pricingType
 	const pricingType = rentPrice === 0 && buyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
 
 	const movie = await prisma.$transaction(async (tx) => {
@@ -154,20 +157,26 @@ const createMovie = async (payload: ICreateMoviePayload) => {
 			});
 		}
 
-		return createdMovie;
+		if (castMemberIds && castMemberIds.length > 0) {
+			await tx.movieCast.createMany({
+				data: castMemberIds.map((castMemberId) => ({
+					movieId: createdMovie.id,
+					castMemberId,
+				})),
+			});
+		}
+
+		return tx.movie.findUnique({
+			where: { id: createdMovie.id },
+			include: {
+				genres: { include: { genre: true } },
+				platforms: { include: { platform: true } },
+				movieCasts: { include: { castMember: true } },
+			},
+		});
 	});
 
-	return prisma.movie.findUnique({
-		where: { id: movie.id },
-		include: {
-			genres: {
-				include: { genre: true },
-			},
-			platforms: {
-				include: { platform: true },
-			},
-		},
-	});
+	return movie;
 };
 
 const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
@@ -179,9 +188,8 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	const { genreIds, platformIds, rentPrice, buyPrice, rentDuration, ...movieData } = payload;
+	const { genreIds, platformIds, castMemberIds, rentPrice, buyPrice, rentDuration, ...movieData } = payload;
 
-	// auto update pricingType
 	const updatedRentPrice = rentPrice ?? isMovieExist.rentPrice;
 	const updatedBuyPrice = buyPrice ?? isMovieExist.buyPrice;
 	const updatedRentDuration = rentDuration ?? isMovieExist.rentDuration;
@@ -203,10 +211,7 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 			await tx.movieGenre.deleteMany({ where: { movieId: id } });
 			if (genreIds.length > 0) {
 				await tx.movieGenre.createMany({
-					data: genreIds.map((genreId) => ({
-						movieId: id,
-						genreId,
-					})),
+					data: genreIds.map((genreId) => ({ movieId: id, genreId })),
 				});
 			}
 		}
@@ -215,28 +220,31 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 			await tx.moviePlatform.deleteMany({ where: { movieId: id } });
 			if (platformIds.length > 0) {
 				await tx.moviePlatform.createMany({
-					data: platformIds.map((platformId) => ({
-						movieId: id,
-						platformId,
-					})),
+					data: platformIds.map((platformId) => ({ movieId: id, platformId })),
 				});
 			}
 		}
 
-		return updatedMovie;
+		if (castMemberIds) {
+			await tx.movieCast.deleteMany({ where: { movieId: id } });
+			if (castMemberIds.length > 0) {
+				await tx.movieCast.createMany({
+					data: castMemberIds.map((castMemberId) => ({ movieId: id, castMemberId })),
+				});
+			}
+		}
+
+		return tx.movie.findUnique({
+			where: { id: updatedMovie.id },
+			include: {
+				genres: { include: { genre: true } },
+				platforms: { include: { platform: true } },
+				movieCasts: { include: { castMember: true } },
+			},
+		});
 	});
 
-	return prisma.movie.findUnique({
-		where: { id: movie.id },
-		include: {
-			genres: {
-				include: { genre: true },
-			},
-			platforms: {
-				include: { platform: true },
-			},
-		},
-	});
+	return movie;
 };
 
 const deleteMovie = async (id: string) => {

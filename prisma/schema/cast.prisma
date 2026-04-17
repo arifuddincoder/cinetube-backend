@@ -1,10 +1,15 @@
 model CastMember {
-  id        String      @id @default(uuid(7))
-  name      String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  movies    MovieCast[]
+  id        String   @id @default(uuid(7))
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  movies MovieCast[]
+
+  @@index([isDeleted], name: "idx_cast_member_deleted")
   @@map("cast_members")
 }
 

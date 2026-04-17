@@ -16,7 +16,6 @@ export const createMovieZodSchema = z.object({
 		.string("Director must be a string")
 		.min(2, "Director name must be at least 2 characters")
 		.max(100, "Director name must be at most 100 characters"),
-	cast: z.array(z.string()).min(1, "At least one cast member is required"),
 	posterImage: z.url("Poster image must be a valid URL").optional(),
 	trailerUrl: z.url("Trailer URL must be a valid URL").optional(),
 	streamingUrl: z.url("Streaming URL must be a valid URL").optional(),
@@ -34,6 +33,7 @@ export const createMovieZodSchema = z.object({
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
+	castMemberIds: z.array(z.string()).optional(),
 });
 
 export const updateMovieZodSchema = z.object({
@@ -54,7 +54,6 @@ export const updateMovieZodSchema = z.object({
 		.min(2, "Director name must be at least 2 characters")
 		.max(100, "Director name must be at most 100 characters")
 		.optional(),
-	cast: z.array(z.string()).optional(),
 	posterImage: z.url("Poster image must be a valid URL").optional(),
 	trailerUrl: z.url("Trailer URL must be a valid URL").optional(),
 	streamingUrl: z.url("Streaming URL must be a valid URL").optional(),
@@ -72,4 +71,5 @@ export const updateMovieZodSchema = z.object({
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
+	castMemberIds: z.array(z.string()).optional(),
 });

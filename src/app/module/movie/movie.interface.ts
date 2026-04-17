@@ -5,7 +5,6 @@ export interface ICreateMoviePayload {
 	synopsis: string;
 	releaseYear: number;
 	director: string;
-	cast: string[];
 	posterImage?: string;
 	trailerUrl?: string;
 	streamingUrl?: string;
@@ -15,6 +14,7 @@ export interface ICreateMoviePayload {
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];
+	castMemberIds?: string[];
 }
 
 export interface IUpdateMoviePayload {
@@ -22,7 +22,6 @@ export interface IUpdateMoviePayload {
 	synopsis?: string;
 	releaseYear?: number;
 	director?: string;
-	cast?: string[];
 	posterImage?: string;
 	trailerUrl?: string;
 	streamingUrl?: string;
@@ -32,4 +31,5 @@ export interface IUpdateMoviePayload {
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];
+	castMemberIds?: string[];
 }

@@ -67,10 +67,23 @@ const deleteCastMember = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const hardDeleteCastMember = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await CastMemberService.hardDeleteCastMember(id as string);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Cast member hard deleted successfully",
+		data: result,
+	});
+});
+
 export const CastMemberController = {
 	getAllCastMembers,
 	getCastMemberById,
 	createCastMember,
 	updateCastMember,
 	deleteCastMember,
+	hardDeleteCastMember,
 };

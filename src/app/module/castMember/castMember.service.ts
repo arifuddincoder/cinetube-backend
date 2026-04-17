@@ -5,20 +5,12 @@ import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { ICreateCastMemberPayload, IUpdateCastMemberPayload } from "./castMember.interface";
 
-// generate slug from name
-const generateSlug = (name: string): string => {
-	return name
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, "-")
-		.replace(/[^a-z0-9-]/g, "");
-};
-
 const getAllCastMembers = async (query: IQueryParams) => {
 	const result = await new QueryBuilder(prisma.castMember, query, {
-		searchableFields: ["name", "slug"],
+		searchableFields: ["name"],
 		filterableFields: [],
 	})
+		.where({ isDeleted: false })
 		.search()
 		.filter()
 		.sort()
@@ -30,7 +22,7 @@ const getAllCastMembers = async (query: IQueryParams) => {
 
 const getCastMemberById = async (id: string) => {
 	const castMember = await prisma.castMember.findUnique({
-		where: { id },
+		where: { id, isDeleted: false },
 		include: {
 			movies: {
 				include: {
@@ -55,8 +47,6 @@ const getCastMemberById = async (id: string) => {
 };
 
 const createCastMember = async (payload: ICreateCastMemberPayload) => {
-	const slug = generateSlug(payload.name);
-
 	const isCastMemberExist = await prisma.castMember.findUnique({
 		where: { name: payload.name },
 	});
@@ -68,7 +58,6 @@ const createCastMember = async (payload: ICreateCastMemberPayload) => {
 	const castMember = await prisma.castMember.create({
 		data: {
 			name: payload.name,
-			slug,
 		},
 	});
 
@@ -84,11 +73,10 @@ const updateCastMember = async (id: string, payload: IUpdateCastMemberPayload) =
 		throw new AppError(status.NOT_FOUND, "Cast member not found");
 	}
 
-	const updatedData: { name?: string; slug?: string } = {};
+	const updatedData: { name?: string } = {};
 
 	if (payload.name) {
 		updatedData.name = payload.name;
-		updatedData.slug = generateSlug(payload.name);
 	}
 
 	const castMember = await prisma.castMember.update({
@@ -101,11 +89,34 @@ const updateCastMember = async (id: string, payload: IUpdateCastMemberPayload) =
 
 const deleteCastMember = async (id: string) => {
 	const isCastMemberExist = await prisma.castMember.findUnique({
+		where: { id, isDeleted: false },
+	});
+
+	if (!isCastMemberExist) {
+		throw new AppError(status.NOT_FOUND, "Cast member not found");
+	}
+
+	const castMember = await prisma.castMember.update({
+		where: { id },
+		data: {
+			isDeleted: true,
+			deletedAt: new Date(),
+		},
+	});
+
+	return castMember;
+};
+const hardDeleteCastMember = async (id: string) => {
+	const isCastMemberExist = await prisma.castMember.findUnique({
 		where: { id },
 	});
 
 	if (!isCastMemberExist) {
 		throw new AppError(status.NOT_FOUND, "Cast member not found");
+	}
+
+	if (!isCastMemberExist.isDeleted) {
+		throw new AppError(status.BAD_REQUEST, "Cast member must be soft deleted before permanent deletion");
 	}
 
 	const castMember = await prisma.castMember.delete({
@@ -114,11 +125,11 @@ const deleteCastMember = async (id: string) => {
 
 	return castMember;
 };
-
 export const CastMemberService = {
 	getAllCastMembers,
 	getCastMemberById,
 	createCastMember,
 	updateCastMember,
 	deleteCastMember,
+	hardDeleteCastMember,
 };
