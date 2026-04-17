@@ -8,6 +8,7 @@ import { MovieRoutes } from "../module/movie/movie.route";
 import { CastMemberRoutes } from "../module/castMember/castMember.route";
 import { WatchlistRoutes } from "../module/watchlist/watchlist.route";
 import { ReviewRoutes } from "../module/review/review.route";
+import { ReviewLikeRoutes } from "../module/reviewLike/reviewLike.route";
 
 const router = Router();
 
@@ -20,4 +21,5 @@ router.use("/movies", MovieRoutes);
 router.use("/cast-members", CastMemberRoutes);
 router.use("/watchlist", WatchlistRoutes);
 router.use("/reviews", ReviewRoutes);
+router.use("/review-likes", ReviewLikeRoutes);
 export const IndexRoutes = router;
