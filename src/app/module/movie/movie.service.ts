@@ -120,7 +120,7 @@ const getMovieById = async (id: string) => {
 };
 
 const createMovie = async (payload: ICreateMoviePayload) => {
-	const { genreIds, platformIds, rentPrice = 0, buyPrice = 0, ...movieData } = payload;
+	const { genreIds, platformIds, rentPrice = 0, buyPrice = 0, rentDuration = 7, ...movieData } = payload;
 
 	// auto set pricingType
 	const pricingType = rentPrice === 0 && buyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
@@ -131,6 +131,7 @@ const createMovie = async (payload: ICreateMoviePayload) => {
 				...movieData,
 				rentPrice,
 				buyPrice,
+				rentDuration,
 				pricingType,
 			},
 		});
@@ -178,11 +179,12 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	const { genreIds, platformIds, rentPrice, buyPrice, ...movieData } = payload;
+	const { genreIds, platformIds, rentPrice, buyPrice, rentDuration, ...movieData } = payload;
 
 	// auto update pricingType
 	const updatedRentPrice = rentPrice ?? isMovieExist.rentPrice;
 	const updatedBuyPrice = buyPrice ?? isMovieExist.buyPrice;
+	const updatedRentDuration = rentDuration ?? isMovieExist.rentDuration;
 	const pricingType = updatedRentPrice === 0 && updatedBuyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
 
 	const movie = await prisma.$transaction(async (tx) => {
@@ -192,6 +194,7 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 				...movieData,
 				rentPrice: updatedRentPrice,
 				buyPrice: updatedBuyPrice,
+				rentDuration: updatedRentDuration,
 				pricingType,
 			},
 		});

@@ -11,6 +11,7 @@ export interface ICreateMoviePayload {
 	streamingUrl?: string;
 	pricingType?: PricingType;
 	rentPrice?: number;
+	rentDuration?: number;
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];
@@ -27,6 +28,7 @@ export interface IUpdateMoviePayload {
 	streamingUrl?: string;
 	pricingType?: PricingType;
 	rentPrice?: number;
+	rentDuration?: number;
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];

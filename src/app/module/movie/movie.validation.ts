@@ -26,6 +26,11 @@ export const createMovieZodSchema = z.object({
 		})
 		.optional(),
 	rentPrice: z.number("Rent price must be a number").min(0, "Rent price cannot be negative").optional(),
+	rentDuration: z
+		.number("Rent duration must be a number")
+		.int("Rent duration must be an integer")
+		.min(1, "Rent duration must be at least 1 day")
+		.optional(),
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
@@ -59,6 +64,11 @@ export const updateMovieZodSchema = z.object({
 		})
 		.optional(),
 	rentPrice: z.number("Rent price must be a number").min(0, "Rent price cannot be negative").optional(),
+	rentDuration: z
+		.number("Rent duration must be a number")
+		.int("Rent duration must be an integer")
+		.min(1, "Rent duration must be at least 1 day")
+		.optional(),
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
