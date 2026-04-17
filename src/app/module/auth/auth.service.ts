@@ -33,6 +33,7 @@ const registerUser = async (payload: IRegisterUserPayload) => {
 		status: data.user.status,
 		isDeleted: data.user.isDeleted,
 		emailVerified: data.user.emailVerified,
+		needPasswordChange: data.user.needPasswordChange,
 	});
 
 	const refreshToken = tokenUtils.getRefreshToken({
@@ -43,6 +44,7 @@ const registerUser = async (payload: IRegisterUserPayload) => {
 		status: data.user.status,
 		isDeleted: data.user.isDeleted,
 		emailVerified: data.user.emailVerified,
+		needPasswordChange: data.user.needPasswordChange,
 	});
 
 	return {
@@ -62,12 +64,12 @@ const loginUser = async (payload: ILoginUserPayload) => {
 		},
 	});
 
-	if (data.user.status === UserStatus.BLOCKED) {
-		throw new AppError(status.FORBIDDEN, "User is blocked");
-	}
-
 	if (data.user.isDeleted || data.user.status === UserStatus.DELETED) {
 		throw new AppError(status.NOT_FOUND, "User is deleted");
+	}
+
+	if (data.user.status === UserStatus.BLOCKED) {
+		throw new AppError(status.FORBIDDEN, "User is blocked");
 	}
 
 	const accessToken = tokenUtils.getAccessToken({

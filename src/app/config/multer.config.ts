@@ -22,7 +22,7 @@ const storage = new CloudinaryStorage({
 		const folder = extension === "pdf" ? "pdfs" : "images";
 
 		return {
-			folder: `ph-healthcare/${folder}`,
+			folder: `cinetube/${folder}`,
 			public_id: uniqueName,
 			resource_type: "auto",
 		};

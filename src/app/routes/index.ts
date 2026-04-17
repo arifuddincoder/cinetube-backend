@@ -10,6 +10,7 @@ import { WatchlistRoutes } from "../module/watchlist/watchlist.route";
 import { ReviewRoutes } from "../module/review/review.route";
 import { ReviewLikeRoutes } from "../module/reviewLike/reviewLike.route";
 import { CommentRoutes } from "../module/comment/comment.route";
+import { UserRoutes } from "../module/user/user.route";
 
 const router = Router();
 
@@ -24,4 +25,5 @@ router.use("/watchlist", WatchlistRoutes);
 router.use("/reviews", ReviewRoutes);
 router.use("/review-likes", ReviewLikeRoutes);
 router.use("/comments", CommentRoutes);
+router.use("/users", UserRoutes);
 export const IndexRoutes = router;

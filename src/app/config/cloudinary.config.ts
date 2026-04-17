@@ -34,8 +34,8 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 			.upload_stream(
 				{
 					resource_type: "auto",
-					public_id: `ph-healthcare/${folder}/${uniqueName}`,
-					folder: `ph-healthcare/${folder}`,
+					public_id: `cinetube/${folder}/${uniqueName}`,
+					folder: `cinetube/${folder}`,
 				},
 				(error, result) => {
 					if (error) {
