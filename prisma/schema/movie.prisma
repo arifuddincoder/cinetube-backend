@@ -4,7 +4,6 @@ model Movie {
   synopsis     String      @db.Text
   releaseYear  Int
   director     String      @db.VarChar(100)
-  cast         String[]
   posterImage  String?
   trailerUrl   String?
   streamingUrl String?
@@ -21,6 +20,7 @@ model Movie {
   platforms  MoviePlatform[]
   reviews    Review[]
   watchlists Watchlist[]
+  movieCasts MovieCast[]
 
   @@index([isDeleted], name: "idx_movie_deleted")
   @@index([title], name: "idx_movie_title")

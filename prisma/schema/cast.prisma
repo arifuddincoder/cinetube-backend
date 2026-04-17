@@ -1,0 +1,19 @@
+model CastMember {
+  id        String      @id @default(uuid(7))
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  movies    MovieCast[]
+
+  @@map("cast_members")
+}
+
+model MovieCast {
+  movieId      String
+  castMemberId String
+  movie        Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  castMember   CastMember @relation(fields: [castMemberId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, castMemberId])
+  @@map("movie_cast")
+}
