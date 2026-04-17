@@ -1,0 +1,33 @@
+import { Router } from "express";
+import { Role } from "../../../generated/prisma/enums";
+import { checkAuth } from "../../middleware/checkAuth";
+import { validateRequest } from "../../middleware/validateRequest";
+import { MovieController } from "./movie.controller";
+import { createMovieZodSchema, updateMovieZodSchema } from "./movie.validation";
+
+const router = Router();
+
+// public routes
+router.get("/", MovieController.getAllMovies);
+router.get("/:id", MovieController.getMovieById);
+
+// admin only routes
+router.post(
+	"/",
+	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+	validateRequest(createMovieZodSchema),
+	MovieController.createMovie,
+);
+
+router.patch(
+	"/:id",
+	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+	validateRequest(updateMovieZodSchema),
+	MovieController.updateMovie,
+);
+
+router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), MovieController.deleteMovie);
+
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), MovieController.hardDeleteMovie);
+
+export const MovieRoutes = router;
