@@ -34,9 +34,8 @@ enum PurchaseType {
 }
 
 enum RentalDuration {
-  HOURS_48
+  DAYS_1
   DAYS_7
-  DAYS_30
 }
 
 enum PlanType {
@@ -60,4 +59,11 @@ enum SortOrder {
   TOP_RATED
   MOST_REVIEWED
   MOST_LIKED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
 }

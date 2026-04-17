@@ -21,6 +21,7 @@ model Movie {
   reviews    Review[]
   watchlists Watchlist[]
   movieCasts MovieCast[]
+  payments   Payment[]
 
   @@index([isDeleted], name: "idx_movie_deleted")
   @@index([title], name: "idx_movie_title")

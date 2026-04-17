@@ -1,0 +1,32 @@
+model Payment {
+  id                 String          @id @default(uuid(7))
+  userId             String
+  movieId            String?
+  amount             Float
+  currency           String          @default("BDT") @db.VarChar(10)
+  status             PaymentStatus   @default(PENDING)
+  transactionId      String?         @unique
+  gateway            PaymentGateway  @default(STRIPE)
+  purchaseType       PurchaseType
+  planType           PlanType?
+  rentalDuration     RentalDuration?
+  rentExpiresAt      DateTime?
+  subscriptionEndsAt DateTime?
+  stripeEventId      String?         @unique
+  stripeSessionId    String?         @unique
+  stripeCustomerId   String?
+  subscriptionId     String?
+  invoiceUrl         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie? @relation(fields: [movieId], references: [id], onDelete: SetNull)
+
+  @@index([transactionId], name: "idx_transaction_id")
+  @@index([userId], name: "idx_payment_user")
+  @@index([status], name: "idx_payment_status")
+  @@index([purchaseType], name: "idx_payment_purchase_type")
+  @@map("payments")
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoice - CineTube</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      color: #1a1a1a;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 620px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+
+    /* Header */
+    .header {
+      background-color: #ffffff;
+      padding: 28px 40px 20px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .logo .cine { color: #1a1a1a; }
+    .logo .tube { color: #e50914; }
+
+    .tagline {
+      margin-top: 6px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #999999;
+    }
+
+    /* Invoice Badge */
+    .invoice-badge {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin: 28px 40px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-icon {
+      width: 36px;
+      height: 36px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .badge-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .badge-text h3 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #15803d;
+    }
+
+    .badge-text p {
+      font-size: 12px;
+      color: #16a34a;
+      margin-top: 2px;
+    }
+
+    /* Body */
+    .body { padding: 28px 40px; }
+
+    .greeting {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .desc {
+      font-size: 14px;
+      color: #666666;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-card {
+      background-color: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .info-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #aaaaaa;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .info-card .value {
+      font-size: 13px;
+      color: #1a1a1a;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    /* Purchase Details */
+    .purchase-box {
+      background-color: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .purchase-box .box-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e8e8e8;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #888888;
+    }
+
+    .purchase-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .purchase-row:last-child {
+      border-bottom: none;
+    }
+
+    .purchase-row .row-label {
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .purchase-row .row-value {
+      font-size: 13px;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    .purchase-row.total {
+      background-color: #f5f5f5;
+    }
+
+    .purchase-row.total .row-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .purchase-row.total .row-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e50914;
+    }
+
+    /* Download Button */
+    .download-btn {
+      display: block;
+      text-align: center;
+      background-color: #e50914;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    /* Access Info */
+    .access-box {
+      background-color: #fffbf0;
+      border-left: 2px solid #d4a017;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+    }
+
+    .access-box p {
+      font-size: 13px;
+      color: #7a6010;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .ignore-text {
+      font-size: 13px;
+      color: #aaaaaa;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 16px 40px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      background-color: #fafafa;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #bbbbbb;
+      line-height: 1.8;
+    }
+
+    .footer a {
+      color: #e50914;
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <span class="cine">Cine</span><span class="tube">Tube</span>
+      </div>
+      <div class="tagline">Payment Invoice</div>
+    </div>
+
+    <!-- Success Badge -->
+    <div class="invoice-badge">
+      <div class="badge-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="badge-text">
+        <h3>Payment Successful</h3>
+        <p>Your transaction has been completed</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <p class="greeting">Hey <%= userName %>,</p>
+      <p class="desc">
+        Thank you for your purchase on CineTube! Your payment has been processed successfully.
+        Please find your invoice details below.
+      </p>
+
+      <!-- Info Grid -->
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="label">Invoice ID</div>
+          <div class="value"><%= invoiceId %></div>
+        </div>
+        <div class="info-card">
+          <div class="label">Payment Date</div>
+          <div class="value"><%= paymentDate %></div>
+        </div>
+        <div class="info-card">
+          <div class="label">Transaction ID</div>
+          <div class="value"><%= transactionId %></div>
+        </div>
+        <div class="info-card">
+          <div class="label">Purchase Type</div>
+          <div class="value"><%= purchaseType %></div>
+        </div>
+      </div>
+
+      <!-- Purchase Details -->
+      <div class="purchase-box">
+        <div class="box-header">Purchase Summary</div>
+
+        <% if (planType) { %>
+        <div class="purchase-row">
+          <span class="row-label">Plan</span>
+          <span class="row-value"><%= planType %></span>
+        </div>
+        <% } %>
+
+        <% if (movieTitle) { %>
+        <div class="purchase-row">
+          <span class="row-label">Movie</span>
+          <span class="row-value"><%= movieTitle %></span>
+        </div>
+        <% } %>
+
+        <div class="purchase-row total">
+          <span class="row-label">Total Amount</span>
+          <span class="row-value">৳<%= amount.toFixed(2) %></span>
+        </div>
+      </div>
+
+      <!-- Download Invoice -->
+      <% if (invoiceUrl) { %>
+      <a href="<%= invoiceUrl %>" class="download-btn">
+        Download Invoice PDF
+      </a>
+      <% } %>
+
+      <!-- Access Info -->
+      <% if (purchaseType === 'SUBSCRIPTION' && subscriptionEndsAt) { %>
+      <div class="access-box">
+        <p>Your subscription is active until <strong><%= subscriptionEndsAt %></strong>. Enjoy unlimited access to all premium content on CineTube.</p>
+      </div>
+      <% } %>
+
+      <% if (purchaseType === 'RENT' && rentExpiresAt) { %>
+      <div class="access-box">
+        <p>Your rental access for <strong><%= movieTitle %></strong> expires on <strong><%= rentExpiresAt %></strong>. Enjoy watching!</p>
+      </div>
+      <% } %>
+
+      <% if (purchaseType === 'BUY') { %>
+      <div class="access-box">
+        <p>You now have <strong>lifetime access</strong> to <strong><%= movieTitle %></strong>. Enjoy watching anytime!</p>
+      </div>
+      <% } %>
+
+      <p class="ignore-text">
+        If you did not make this purchase, please contact us immediately at support@cinetube.com.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        &copy; <%= new Date().getFullYear() %> CineTube. All rights reserved.<br/>
+        <a href="#">Privacy Policy</a> &nbsp;·&nbsp; <a href="#">Terms of Service</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>

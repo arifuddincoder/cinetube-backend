@@ -35,6 +35,13 @@ interface EnvConfig {
 
 	SUPER_ADMIN_EMAIL: string;
 	SUPER_ADMIN_PASSWORD: string;
+
+	STRIPE: {
+		STRIPE_SECRET_KEY: string;
+		STRIPE_WEBHOOK_SECRET: string;
+		STRIPE_MONTHLY_PRICE_ID: string;
+		STRIPE_YEARLY_PRICE_ID: string;
+	};
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -62,11 +69,14 @@ const loadEnvVariables = (): EnvConfig => {
 		"GOOGLE_CALLBACK_URL",
 		"SUPER_ADMIN_EMAIL",
 		"SUPER_ADMIN_PASSWORD",
+		"STRIPE_SECRET_KEY",
+		"STRIPE_WEBHOOK_SECRET",
+		"STRIPE_MONTHLY_PRICE_ID",
+		"STRIPE_YEARLY_PRICE_ID",
 	];
 
 	requireEnvVariable.forEach((variable) => {
 		if (!process.env[variable]) {
-			// throw new Error(`Environment variable ${variable} is required but not set in .env file.`);
 			throw new AppError(
 				status.INTERNAL_SERVER_ERROR,
 				`Environment variable ${variable} is required but not set in .env file.`,
@@ -106,6 +116,12 @@ const loadEnvVariables = (): EnvConfig => {
 
 		SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
 		SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
+		STRIPE: {
+			STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+			STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
+			STRIPE_MONTHLY_PRICE_ID: process.env.STRIPE_MONTHLY_PRICE_ID as string,
+			STRIPE_YEARLY_PRICE_ID: process.env.STRIPE_YEARLY_PRICE_ID as string,
+		},
 	};
 };
 

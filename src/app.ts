@@ -9,6 +9,7 @@ import qs from "qs";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import path from "path";
+import { PaymentController } from "./app/module/payment/payment.controller";
 
 const app: Application = express();
 app.set("query parser", (str: string) => qs.parse(str));
@@ -17,7 +18,7 @@ app.set("views", path.resolve(process.cwd(), "src/app/templates"));
 
 // Better Auth handler
 app.use("/api/auth", toNodeHandler(auth));
-
+app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
 // CORS
 app.use(
 	cors({
