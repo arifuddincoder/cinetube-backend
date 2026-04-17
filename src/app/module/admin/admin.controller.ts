@@ -90,7 +90,17 @@ const changeUserRole = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
+const hardDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await AdminService.hardDeleteAdmin(id as string);
 
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Admin permanently deleted successfully",
+		data: result,
+	});
+});
 export const AdminController = {
 	getAllAdmins,
 	getAdminById,
@@ -99,4 +109,5 @@ export const AdminController = {
 	deleteAdmin,
 	changeUserStatus,
 	changeUserRole,
+	hardDeleteAdmin,
 };

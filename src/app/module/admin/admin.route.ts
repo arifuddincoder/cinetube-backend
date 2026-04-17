@@ -40,4 +40,6 @@ router.patch("/:id", checkAuth(Role.SUPER_ADMIN), validateRequest(updateAdminZod
 
 router.delete("/:id", checkAuth(Role.SUPER_ADMIN), AdminController.deleteAdmin);
 
+router.delete("/hard/:id", checkAuth(Role.SUPER_ADMIN), AdminController.hardDeleteAdmin);
+
 export const AdminRoutes = router;

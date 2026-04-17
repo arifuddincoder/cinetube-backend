@@ -234,6 +234,25 @@ const changeUserRole = async (payload: IChangeUserRolePayload) => {
 	return updated;
 };
 
+const hardDeleteAdmin = async (id: string) => {
+	const isAdminExist = await prisma.user.findUnique({
+		where: {
+			id,
+			role: Role.ADMIN,
+		},
+	});
+
+	if (!isAdminExist) {
+		throw new AppError(status.NOT_FOUND, "Admin not found");
+	}
+
+	const admin = await prisma.user.delete({
+		where: { id },
+	});
+
+	return admin;
+};
+
 export const AdminService = {
 	getAllAdmins,
 	getAdminById,
@@ -242,4 +261,5 @@ export const AdminService = {
 	deleteAdmin,
 	changeUserStatus,
 	changeUserRole,
+	hardDeleteAdmin,
 };
