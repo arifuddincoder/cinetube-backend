@@ -9,29 +9,27 @@ import {
 	ICreateAdminPayload,
 	IUpdateAdminPayload,
 } from "./admin.interface";
+import { IQueryParams } from "../../interfaces/query.interface";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
-const getAllAdmins = async () => {
-	const admins = await prisma.user.findMany({
-		where: {
+const getAllAdmins = async (query: IQueryParams) => {
+	const result = await new QueryBuilder(prisma.user, query, {
+		searchableFields: ["name", "email"],
+		filterableFields: ["role", "status"],
+	})
+		.where({
 			role: {
 				in: [Role.ADMIN, Role.SUPER_ADMIN],
 			},
 			isDeleted: false,
-		},
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			image: true,
-			role: true,
-			status: true,
-			emailVerified: true,
-			createdAt: true,
-			updatedAt: true,
-		},
-	});
+		})
+		.search()
+		.filter()
+		.sort()
+		.paginate()
+		.execute();
 
-	return admins;
+	return result;
 };
 
 const getAdminById = async (id: string) => {

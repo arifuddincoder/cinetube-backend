@@ -2,18 +2,24 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { ICreateGenrePayload, IUpdateGenrePayload } from "./genre.interface";
+import { IQueryParams } from "../../interfaces/query.interface";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
-const getAllGenres = async () => {
-	const genres = await prisma.genre.findMany({
-		where: {
+const getAllGenres = async (query: IQueryParams) => {
+	const result = await new QueryBuilder(prisma.genre, query, {
+		searchableFields: ["name"],
+		filterableFields: ["isDeleted"],
+	})
+		.where({
 			isDeleted: false,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
+		})
+		.search()
+		.filter()
+		.sort()
+		.paginate()
+		.execute();
 
-	return genres;
+	return result;
 };
 
 const getGenreById = async (id: string) => {

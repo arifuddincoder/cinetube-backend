@@ -2,18 +2,24 @@ import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import { ICreatePlatformPayload, IUpdatePlatformPayload } from "./platform.interface";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { IQueryParams } from "../../interfaces/query.interface";
 
-const getAllPlatforms = async () => {
-	const platforms = await prisma.platform.findMany({
-		where: {
+const getAllPlatforms = async (query: IQueryParams) => {
+	const result = await new QueryBuilder(prisma.platform, query, {
+		searchableFields: ["name"],
+		filterableFields: ["isDeleted"],
+	})
+		.where({
 			isDeleted: false,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
+		})
+		.search()
+		.filter()
+		.sort()
+		.paginate()
+		.execute();
 
-	return platforms;
+	return result;
 };
 
 const getPlatformById = async (id: string) => {
