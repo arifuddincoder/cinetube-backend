@@ -13,6 +13,25 @@ const getMyWatchlist = async (user: IRequestUser, query: IQueryParams) => {
 		.where({
 			userId: user.userId,
 		})
+		.include({
+			movie: {
+				select: {
+					id: true,
+					title: true,
+					posterImage: true,
+					pricingType: true,
+					rentPrice: true,
+					buyPrice: true,
+					releaseYear: true,
+					director: true,
+					genres: {
+						include: {
+							genre: true,
+						},
+					},
+				},
+			},
+		})
 		.sort()
 		.paginate()
 		.execute();

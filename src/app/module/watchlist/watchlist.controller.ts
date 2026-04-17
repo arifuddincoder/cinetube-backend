@@ -22,7 +22,7 @@ const getMyWatchlist = catchAsync(async (req: Request, res: Response) => {
 const addToWatchlist = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user;
 	const { movieId } = req.params;
-	const result = await WatchlistService.addToWatchlist(user, movieId);
+	const result = await WatchlistService.addToWatchlist(user, movieId as string);
 
 	sendResponse(res, {
 		httpStatusCode: status.CREATED,
