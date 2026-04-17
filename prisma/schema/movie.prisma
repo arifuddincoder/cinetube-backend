@@ -11,11 +11,11 @@ model Movie {
   pricingType  PricingType @default(FREE)
   rentPrice    Float       @default(0)
   buyPrice     Float       @default(0)
-
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  rentDuration Int         @default(7)
+  isDeleted    Boolean     @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   genres     MovieGenre[]
   platforms  MoviePlatform[]
