@@ -33,9 +33,12 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 		cloudinary.uploader
 			.upload_stream(
 				{
-					resource_type: "auto",
+					resource_type: extension === "pdf" ? "raw" : "image",
 					public_id: `cinetube/${folder}/${uniqueName}`,
 					folder: `cinetube/${folder}`,
+					type: "upload",
+					access_mode: "public",
+					...(extension === "pdf" && { format: "pdf" }),
 				},
 				(error, result) => {
 					if (error) {

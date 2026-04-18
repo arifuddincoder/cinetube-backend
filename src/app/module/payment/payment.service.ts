@@ -29,7 +29,12 @@ const SUBSCRIPTION_PRICES = {
 
 const RENTAL_DAYS = {
 	[RentalDuration.DAYS_1]: 1,
+	[RentalDuration.DAYS_2]: 2,
+	[RentalDuration.DAYS_3]: 3,
+	[RentalDuration.DAYS_5]: 5,
 	[RentalDuration.DAYS_7]: 7,
+	[RentalDuration.DAYS_14]: 14,
+	[RentalDuration.DAYS_15]: 15,
 };
 
 const getMyPayments = async (user: IRequestUser, query: IQueryParams) => {
@@ -92,6 +97,17 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 		throw new AppError(status.NOT_FOUND, "User not found");
 	}
 
+	if (
+		isUserExist.subscriptionStatus === "ACTIVE" &&
+		isUserExist.subscriptionEndsAt &&
+		isUserExist.subscriptionEndsAt > new Date()
+	) {
+		throw new AppError(
+			status.CONFLICT,
+			`You already have an active subscription until ${isUserExist.subscriptionEndsAt.toLocaleDateString()}`,
+		);
+	}
+
 	const priceConfig = SUBSCRIPTION_PRICES[planType];
 
 	// create or get stripe customer
@@ -139,6 +155,7 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 			paymentId: payment.id,
 			userId: user.userId,
 			planType,
+			purchaseType: PurchaseType.SUBSCRIPTION,
 		},
 	});
 
@@ -267,7 +284,6 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 };
 
 const handleStripeWebhookEvent = async (event: Stripe.Event) => {
-	// idempotency check
 	const existingPayment = await prisma.payment.findFirst({
 		where: { stripeEventId: event.id },
 	});
@@ -280,7 +296,7 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 	switch (event.type) {
 		case "checkout.session.completed": {
 			const session = event.data.object as any;
-			const { paymentId, userId, planType, movieId, purchaseType, rentalDuration } = session.metadata;
+			const { paymentId, userId, planType, purchaseType, rentalDuration } = session.metadata;
 
 			if (!paymentId || !userId) {
 				console.error("Missing metadata in webhook event");
@@ -304,7 +320,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 				let rentExpiresAt: Date | null = null;
 				let subscriptionId: string | null = null;
 
-				// subscription handling
 				if (purchaseType === PurchaseType.SUBSCRIPTION && planType) {
 					const days = SUBSCRIPTION_PRICES[planType as PlanType].days;
 					subscriptionEndsAt = new Date();
@@ -320,15 +335,13 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 					});
 				}
 
-				// rent handling
 				if (purchaseType === PurchaseType.RENT && rentalDuration) {
 					const days = RENTAL_DAYS[rentalDuration as RentalDuration];
 					rentExpiresAt = new Date();
 					rentExpiresAt.setDate(rentExpiresAt.getDate() + days);
 				}
 
-				// generate invoice pdf
-				let invoiceUrl = null;
+				// generate pdf
 				try {
 					pdfBuffer = await generateInvoicePdf({
 						invoiceId: paymentId,
@@ -343,10 +356,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 						rentExpiresAt: rentExpiresAt?.toISOString(),
 						subscriptionEndsAt: subscriptionEndsAt?.toISOString(),
 					});
-
-					const cloudinaryResponse = await uploadFileToCloudinary(pdfBuffer, `invoice-${paymentId}-${Date.now()}.pdf`);
-
-					invoiceUrl = cloudinaryResponse?.secure_url;
 				} catch (pdfError) {
 					console.error("Error generating invoice PDF:", pdfError);
 				}
@@ -360,49 +369,50 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 						subscriptionEndsAt,
 						rentExpiresAt,
 						stripeEventId: event.id,
-						invoiceUrl,
+						paymentGatewayData: session,
 					},
 				});
 
-				return { updatedPayment, invoiceUrl };
+				return { updatedPayment, subscriptionEndsAt, rentExpiresAt };
 			});
 
 			// send invoice email
-			if (result.invoiceUrl) {
-				try {
-					await sendEmail({
-						to: payment.user.email,
-						subject: `Payment Confirmation & Invoice - CineTube`,
-						templateName: "invoice",
-						templateData: {
-							userName: payment.user.name,
-							invoiceId: paymentId,
-							transactionId: session.payment_intent || session.id,
-							paymentDate: new Date().toLocaleDateString(),
-							purchaseType: payment.purchaseType,
-							planType: planType || null,
-							movieTitle: payment.movie?.title || null,
-							amount: payment.amount,
-							invoiceUrl: result.invoiceUrl,
-						},
-						attachments: [
-							{
-								filename: `Invoice-${paymentId}.pdf`,
-								content: pdfBuffer || Buffer.from(""),
-								contentType: "application/pdf",
-							},
-						],
-					});
-				} catch (emailError) {
-					console.error("Error sending invoice email:", emailError);
-				}
+			try {
+				await sendEmail({
+					to: payment.user.email,
+					subject: `Payment Confirmation & Invoice - CineTube`,
+					templateName: "invoice",
+					templateData: {
+						userName: payment.user.name,
+						invoiceId: paymentId,
+						transactionId: session.payment_intent || session.id,
+						paymentDate: new Date().toLocaleDateString(),
+						purchaseType: payment.purchaseType,
+						planType: planType || null,
+						movieTitle: payment.movie?.title || null,
+						amount: payment.amount,
+						invoiceUrl: null,
+						subscriptionEndsAt: result.subscriptionEndsAt?.toLocaleDateString() || null,
+						rentExpiresAt: result.rentExpiresAt?.toLocaleDateString() || null,
+					},
+					attachments: pdfBuffer
+						? [
+								{
+									filename: `Invoice-${paymentId}.pdf`,
+									content: pdfBuffer,
+									contentType: "application/pdf",
+								},
+							]
+						: [],
+				});
+			} catch (emailError) {
+				console.error("Error sending invoice email:", emailError);
 			}
 
 			break;
 		}
 
 		case "invoice.paid": {
-			// subscription renewal
 			const invoice = event.data.object as any;
 			const subscriptionId = invoice.subscription;
 
@@ -415,12 +425,27 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 
 			if (!payment) break;
 
+			// first invoice.paid is for initial subscription — skip if already handled by checkout.session.completed
+			const isFirstPayment = await prisma.payment.findFirst({
+				where: {
+					subscriptionId,
+					status: PaymentStatus.COMPLETED,
+				},
+			});
+
+			if (isFirstPayment) {
+				console.log("Initial subscription already handled. Skipping invoice.paid");
+				break;
+			}
+
 			const planType = payment.planType as PlanType;
 			const days = SUBSCRIPTION_PRICES[planType].days;
 			const subscriptionEndsAt = new Date();
 			subscriptionEndsAt.setDate(subscriptionEndsAt.getDate() + days);
 
-			await prisma.$transaction([
+			let pdfBuffer: Buffer | null = null;
+
+			const [newPayment] = await prisma.$transaction([
 				prisma.payment.create({
 					data: {
 						userId: payment.userId,
@@ -444,11 +469,60 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 				}),
 			]);
 
+			// generate pdf for renewal
+			try {
+				pdfBuffer = await generateInvoicePdf({
+					invoiceId: newPayment.id,
+					userName: payment.user.name,
+					userEmail: payment.user.email,
+					purchaseType: PurchaseType.SUBSCRIPTION,
+					planType,
+					amount: SUBSCRIPTION_PRICES[planType].amount,
+					transactionId: invoice.payment_intent,
+					paymentDate: new Date().toISOString(),
+					subscriptionEndsAt: subscriptionEndsAt.toISOString(),
+				});
+			} catch (pdfError) {
+				console.error("Error generating renewal PDF:", pdfError);
+			}
+
+			// send renewal email
+			try {
+				await sendEmail({
+					to: payment.user.email,
+					subject: "Subscription Renewed - CineTube",
+					templateName: "invoice",
+					templateData: {
+						userName: payment.user.name,
+						invoiceId: newPayment.id,
+						transactionId: invoice.payment_intent,
+						paymentDate: new Date().toLocaleDateString(),
+						purchaseType: "SUBSCRIPTION",
+						planType: planType,
+						movieTitle: null,
+						amount: SUBSCRIPTION_PRICES[planType].amount,
+						invoiceUrl: null,
+						subscriptionEndsAt: subscriptionEndsAt.toLocaleDateString(),
+						rentExpiresAt: null,
+					},
+					attachments: pdfBuffer
+						? [
+								{
+									filename: `Invoice-${newPayment.id}.pdf`,
+									content: pdfBuffer,
+									contentType: "application/pdf",
+								},
+							]
+						: [],
+				});
+			} catch (emailError) {
+				console.error("Error sending renewal email:", emailError);
+			}
+
 			break;
 		}
 
 		case "invoice.payment_failed": {
-			// subscription payment failed
 			const invoice = event.data.object as any;
 			const subscriptionId = invoice.subscription;
 
@@ -469,7 +543,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 		}
 
 		case "customer.subscription.deleted": {
-			// subscription cancelled
 			const subscription = event.data.object as any;
 
 			const payment = await prisma.payment.findFirst({
