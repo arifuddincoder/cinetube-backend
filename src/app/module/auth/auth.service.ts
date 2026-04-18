@@ -298,6 +298,7 @@ const resendOtp = async (email: string) => {
 		data: { lastOtpSentAt: new Date() },
 	});
 };
+
 const forgetPassword = async (email: string) => {
 	const isUserExist = await prisma.user.findUnique({
 		where: {

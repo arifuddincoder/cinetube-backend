@@ -42,3 +42,7 @@ export const changePasswordZodSchema = z.object({
 		.min(6, "New password must be at least 6 characters")
 		.max(32, "New password must be at most 32 characters"),
 });
+
+export const resendOtpZodSchema = z.object({
+	email: z.string().email("Invalid email address"),
+});

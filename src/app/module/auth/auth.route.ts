@@ -8,6 +8,7 @@ import {
 	forgetPasswordZodSchema,
 	resetPasswordZodSchema,
 	changePasswordZodSchema,
+	resendOtpZodSchema,
 } from "./auth.validation";
 import { Role } from "../../../generated/prisma/browser";
 import { checkAuth } from "../../middleware/checkAuth";
@@ -17,7 +18,7 @@ const router = Router();
 router.post("/register", validateRequest(registerUserZodSchema), AuthController.registerUser);
 router.post("/login", validateRequest(loginUserZodSchema), AuthController.loginUser);
 router.post("/verify-email", validateRequest(verifyEmailZodSchema), AuthController.verifyEmail);
-router.post("/resend-otp", AuthController.resendOtp);
+router.post("/resend-otp", validateRequest(resendOtpZodSchema), AuthController.resendOtp);
 router.post("/forget-password", validateRequest(forgetPasswordZodSchema), AuthController.forgetPassword);
 router.post("/reset-password", validateRequest(resetPasswordZodSchema), AuthController.resetPassword);
 router.post(
