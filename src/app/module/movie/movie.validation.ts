@@ -1,6 +1,6 @@
 import z from "zod";
-import { PricingType } from "../../../generated/prisma/enums";
-
+import { PricingType, RentalDuration } from "../../../generated/prisma/enums";
+const rentalDurationValues = Object.values(RentalDuration) as [string, ...string[]];
 export const createMovieZodSchema = z.object({
 	title: z
 		.string("Title must be a string")
@@ -25,11 +25,7 @@ export const createMovieZodSchema = z.object({
 		})
 		.optional(),
 	rentPrice: z.number("Rent price must be a number").min(0, "Rent price cannot be negative").optional(),
-	rentDuration: z
-		.number("Rent duration must be a number")
-		.int("Rent duration must be an integer")
-		.min(1, "Rent duration must be at least 1 day")
-		.optional(),
+	rentDuration: z.enum(rentalDurationValues).optional(),
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
@@ -63,11 +59,7 @@ export const updateMovieZodSchema = z.object({
 		})
 		.optional(),
 	rentPrice: z.number("Rent price must be a number").min(0, "Rent price cannot be negative").optional(),
-	rentDuration: z
-		.number("Rent duration must be a number")
-		.int("Rent duration must be an integer")
-		.min(1, "Rent duration must be at least 1 day")
-		.optional(),
+	rentDuration: z.enum(rentalDurationValues).optional(),
 	buyPrice: z.number("Buy price must be a number").min(0, "Buy price cannot be negative").optional(),
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),

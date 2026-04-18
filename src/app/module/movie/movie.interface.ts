@@ -1,4 +1,4 @@
-import { PricingType } from "../../../generated/prisma/enums";
+import { PricingType, RentalDuration } from "../../../generated/prisma/enums";
 
 export interface ICreateMoviePayload {
 	title: string;
@@ -10,7 +10,7 @@ export interface ICreateMoviePayload {
 	streamingUrl?: string;
 	pricingType?: PricingType;
 	rentPrice?: number;
-	rentDuration?: number;
+	rentDuration?: RentalDuration;
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];
@@ -27,7 +27,7 @@ export interface IUpdateMoviePayload {
 	streamingUrl?: string;
 	pricingType?: PricingType;
 	rentPrice?: number;
-	rentDuration?: number;
+	rentDuration?: RentalDuration;
 	buyPrice?: number;
 	genreIds?: string[];
 	platformIds?: string[];

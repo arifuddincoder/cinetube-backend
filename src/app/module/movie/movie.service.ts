@@ -124,7 +124,7 @@ const getMovieById = async (id: string) => {
 };
 
 const createMovie = async (payload: ICreateMoviePayload) => {
-	const { genreIds, platformIds, castMemberIds, rentPrice = 0, buyPrice = 0, rentDuration = 7, ...movieData } = payload;
+	const { genreIds, platformIds, castMemberIds, rentPrice = 0, buyPrice = 0, rentDuration, ...movieData } = payload;
 
 	const pricingType = rentPrice === 0 && buyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
 
