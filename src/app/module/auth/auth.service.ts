@@ -259,7 +259,45 @@ const verifyEmail = async (email: string, otp: string) => {
 		});
 	}
 };
+const resendOtp = async (email: string) => {
+	const user = await prisma.user.findUnique({
+		where: { email },
+	});
 
+	if (!user) {
+		throw new AppError(status.NOT_FOUND, "User not found");
+	}
+
+	if (user.emailVerified) {
+		throw new AppError(status.BAD_REQUEST, "Email already verified");
+	}
+
+	// last OTP sent time check
+	if (user.lastOtpSentAt) {
+		const minutesSinceLastOtp = (Date.now() - new Date(user.lastOtpSentAt).getTime()) / 1000 / 60;
+
+		if (minutesSinceLastOtp < 2) {
+			const secondsRemaining = Math.ceil(2 * 60 - minutesSinceLastOtp * 60);
+			throw new AppError(
+				status.TOO_MANY_REQUESTS,
+				`Please wait ${secondsRemaining} seconds before requesting a new OTP`,
+			);
+		}
+	}
+
+	await auth.api.sendVerificationOTP({
+		body: {
+			email,
+			type: "email-verification",
+		},
+	});
+
+	// update last OTP sent time
+	await prisma.user.update({
+		where: { email },
+		data: { lastOtpSentAt: new Date() },
+	});
+};
 const forgetPassword = async (email: string) => {
 	const isUserExist = await prisma.user.findUnique({
 		where: {
@@ -359,4 +397,5 @@ export const AuthService = {
 	forgetPassword,
 	resetPassword,
 	googleLoginSuccess,
+	resendOtp,
 };
