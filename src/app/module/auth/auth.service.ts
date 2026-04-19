@@ -104,12 +104,6 @@ const getMe = async (user: IRequestUser) => {
 		where: {
 			id: user.userId,
 		},
-		// include: {
-		// 	reviews: true,
-		// 	watchlist: true,
-		// 	ratings: true,
-		// 	payments: true,
-		// },
 	});
 
 	if (!isUserExists) {

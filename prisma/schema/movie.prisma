@@ -11,6 +11,7 @@ model Movie {
   rentPrice    Float           @default(0)
   buyPrice     Float           @default(0)
   rentDuration RentalDuration?
+  isFeatured   Boolean         @default(false)
   isDeleted    Boolean         @default(false)
   deletedAt    DateTime?
   createdAt    DateTime        @default(now())

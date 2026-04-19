@@ -30,6 +30,7 @@ export const createMovieZodSchema = z.object({
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
 	castMemberIds: z.array(z.string()).optional(),
+	isFeatured: z.boolean().optional(),
 });
 
 export const updateMovieZodSchema = z.object({
@@ -64,4 +65,5 @@ export const updateMovieZodSchema = z.object({
 	genreIds: z.array(z.string()).optional(),
 	platformIds: z.array(z.string()).optional(),
 	castMemberIds: z.array(z.string()).optional(),
+	isFeatured: z.boolean().optional(),
 });

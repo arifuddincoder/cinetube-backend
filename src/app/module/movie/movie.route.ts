@@ -8,7 +8,9 @@ import { createMovieZodSchema, updateMovieZodSchema } from "./movie.validation";
 const router = Router();
 
 // public routes
+router.get("/filters", MovieController.getMovieFilters);
 router.get("/", MovieController.getAllMovies);
+router.get("/top-rated", MovieController.getTopRatedMovies);
 router.get("/:id", MovieController.getMovieById);
 
 // admin only routes

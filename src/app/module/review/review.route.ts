@@ -39,5 +39,6 @@ router.patch(
 	validateRequest(updateReviewStatusZodSchema),
 	ReviewController.updateReviewStatus,
 );
+router.get("/movie/:movieId", ReviewController.getReviewsByMovie);
 
 export const ReviewRoutes = router;

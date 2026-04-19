@@ -311,7 +311,15 @@ const deleteReview = async (user: IRequestUser, id: string) => {
 
 	return review;
 };
-
+const getReviewsByMovie = async (movieId: string, query: IQueryParams) => {
+	return await new QueryBuilder(prisma.review, query, {
+		filterableFields: ["status"],
+	})
+		.where({ movieId, isDeleted: false })
+		.sort()
+		.paginate()
+		.execute();
+};
 export const ReviewService = {
 	getAllReviews,
 	getMyReviews,
@@ -321,4 +329,5 @@ export const ReviewService = {
 	submitReview,
 	updateReviewStatus,
 	deleteReview,
+	getReviewsByMovie,
 };

@@ -95,7 +95,11 @@ export const checkAuth =
 			if (authRoles.length > 0 && !authRoles.includes(verifiedToken.data!.role as Role)) {
 				throw new AppError(status.FORBIDDEN, "Forbidden access! You do not have permission to access this resource.");
 			}
-
+			req.user = {
+				userId: verifiedToken.data!.userId,
+				role: verifiedToken.data!.role as Role,
+				email: verifiedToken.data!.email,
+			};
 			next();
 		} catch (error: any) {
 			next(error);

@@ -78,6 +78,28 @@ const hardDeleteMovie = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
+const getTopRatedMovies = catchAsync(async (req: Request, res: Response) => {
+	const limit = Number(req.query.limit) || 5;
+	const result = await MovieService.getTopRatedMovies(limit);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Top rated movies fetched successfully",
+		data: result,
+	});
+});
+
+const getMovieFilters = catchAsync(async (req: Request, res: Response) => {
+	const result = await MovieService.getMovieFilters();
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Movie filters fetched successfully",
+		data: result,
+	});
+});
 
 export const MovieController = {
 	getAllMovies,
@@ -86,4 +108,6 @@ export const MovieController = {
 	updateMovie,
 	deleteMovie,
 	hardDeleteMovie,
+	getTopRatedMovies,
+	getMovieFilters,
 };

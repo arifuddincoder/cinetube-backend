@@ -109,7 +109,17 @@ const deleteReview = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
+const getReviewsByMovie = catchAsync(async (req: Request, res: Response) => {
+	const { movieId } = req.params;
+	const result = await ReviewService.getReviewsByMovie(movieId as string, req.query as any);
 
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Reviews fetched successfully",
+		data: result,
+	});
+});
 export const ReviewController = {
 	getAllReviews,
 	getMyReviews,
@@ -119,4 +129,5 @@ export const ReviewController = {
 	submitReview,
 	updateReviewStatus,
 	deleteReview,
+	getReviewsByMovie,
 };

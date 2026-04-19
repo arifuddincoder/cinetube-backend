@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Stripe from "stripe";
 import { PaymentStatus, PlanType, PurchaseType, RentalDuration } from "../../../generated/prisma/enums";
-import { uploadFileToCloudinary } from "../../config/cloudinary.config";
 import { envVars } from "../../config/env";
 import { stripe } from "../../config/stripe.config";
 import AppError from "../../errorHelpers/AppError";

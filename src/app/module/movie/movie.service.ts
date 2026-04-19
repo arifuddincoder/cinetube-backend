@@ -7,18 +7,69 @@ import { QueryBuilder } from "../../utils/QueryBuilder";
 import { ICreateMoviePayload, IUpdateMoviePayload } from "./movie.interface";
 
 const getAllMovies = async (query: IQueryParams) => {
-	const result = await new QueryBuilder(prisma.movie, query, {
-		searchableFields: ["title", "director", "synopsis"],
-		filterableFields: ["pricingType", "releaseYear", "isDeleted"],
-	})
-		.where({
-			isDeleted: false,
-		})
+	const { genreId, platformId, minRating, search, sortBy, sortOrder, releaseYearFrom, releaseYearTo, ...restQuery } =
+		query as any;
+
+	if (search) {
+		restQuery.searchTerm = search;
+	}
+
+	const directSortableFields = ["title", "releaseYear", "createdAt", "updatedAt", "pricingType"];
+	const safeSortBy = directSortableFields.includes(sortBy) ? sortBy : "createdAt";
+	const safeSortOrder = sortOrder ?? "desc";
+
+	const whereClause: any = { isDeleted: false };
+
+	if (genreId) {
+		whereClause.genres = { some: { genreId } };
+	}
+
+	if (platformId) {
+		whereClause.platforms = { some: { platformId } };
+	}
+
+	// year range filter
+	if (releaseYearFrom || releaseYearTo) {
+		whereClause.releaseYear = {};
+		if (releaseYearFrom) whereClause.releaseYear.gte = parseInt(releaseYearFrom);
+		if (releaseYearTo) whereClause.releaseYear.lte = parseInt(releaseYearTo);
+	}
+
+	const result = await new QueryBuilder(
+		prisma.movie,
+		{ ...restQuery, sortBy: safeSortBy, sortOrder: safeSortOrder },
+		{
+			searchableFields: ["title", "director", "synopsis"],
+			filterableFields: ["pricingType", "isFeatured"],
+		},
+	)
+		.where(whereClause)
 		.search()
 		.filter()
 		.sort()
 		.paginate()
 		.execute();
+
+	if (minRating) {
+		const min = parseFloat(minRating);
+		result.data = (result.data as any[]).filter((movie: any) => (movie.averageRating ?? 0) >= min);
+	}
+
+	if (sortBy === "totalReviews") {
+		result.data = (result.data as any[]).sort((a: any, b: any) =>
+			sortOrder === "asc"
+				? (a.totalReviews ?? 0) - (b.totalReviews ?? 0)
+				: (b.totalReviews ?? 0) - (a.totalReviews ?? 0),
+		);
+	}
+
+	if (sortBy === "averageRating") {
+		result.data = (result.data as any[]).sort((a: any, b: any) =>
+			sortOrder === "asc"
+				? (a.averageRating ?? 0) - (b.averageRating ?? 0)
+				: (b.averageRating ?? 0) - (a.averageRating ?? 0),
+		);
+	}
 
 	return result;
 };
@@ -287,6 +338,56 @@ const hardDeleteMovie = async (id: string) => {
 	return movie;
 };
 
+const getTopRatedMovies = async (limit = 3) => {
+	const movies = await prisma.movie.findMany({
+		where: { isDeleted: false },
+		include: {
+			genres: { include: { genre: true } },
+			platforms: { include: { platform: true } },
+			reviews: {
+				where: { status: "PUBLISHED", isDeleted: false },
+				select: { rating: true },
+			},
+		},
+	});
+
+	const moviesWithRating = movies.map((movie) => {
+		const ratings = movie.reviews.map((r) => r.rating);
+		const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+		return { ...movie, averageRating: avg, totalReviews: ratings.length };
+	});
+
+	return moviesWithRating.sort((a, b) => b.averageRating - a.averageRating).slice(0, limit);
+};
+
+// movie.service.ts এ যোগ করো
+const getMovieFilters = async () => {
+	const movies = await prisma.movie.findMany({
+		where: { isDeleted: false },
+		select: {
+			releaseYear: true,
+			genres: { include: { genre: true } },
+			platforms: { include: { platform: true } },
+		},
+	});
+
+	const genreMap = new Map();
+	const platformMap = new Map();
+	const yearSet = new Set<number>();
+
+	movies.forEach((movie) => {
+		yearSet.add(movie.releaseYear);
+		movie.genres.forEach(({ genre }) => genreMap.set(genre.id, genre));
+		movie.platforms.forEach(({ platform }) => platformMap.set(platform.id, platform));
+	});
+
+	return {
+		genres: Array.from(genreMap.values()),
+		platforms: Array.from(platformMap.values()),
+		availableYears: Array.from(yearSet).sort((a, b) => b - a),
+	};
+};
+
 export const MovieService = {
 	getAllMovies,
 	getMovieById,
@@ -294,4 +395,6 @@ export const MovieService = {
 	updateMovie,
 	deleteMovie,
 	hardDeleteMovie,
+	getTopRatedMovies,
+	getMovieFilters,
 };

@@ -15,6 +15,7 @@ export interface ICreateMoviePayload {
 	genreIds?: string[];
 	platformIds?: string[];
 	castMemberIds?: string[];
+	isFeatured?: boolean;
 }
 
 export interface IUpdateMoviePayload {
@@ -32,4 +33,5 @@ export interface IUpdateMoviePayload {
 	genreIds?: string[];
 	platformIds?: string[];
 	castMemberIds?: string[];
+	isFeatured?: boolean;
 }
