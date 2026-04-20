@@ -6,7 +6,6 @@ import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IUpdateUserPayload, IChangeEmailPayload } from "./user.interface";
 import { auth } from "../../lib/auth";
-import { envVars } from "../../config/env";
 import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
 
 const getAllUsers = async (query: IQueryParams) => {
@@ -88,7 +87,7 @@ const updateMyProfile = async (user: IRequestUser, payload: IUpdateUserPayload) 
 	return updated;
 };
 
-const changeEmail = async (user: IRequestUser, payload: IChangeEmailPayload, sessionToken: string) => {
+const changeEmail = async (user: IRequestUser, payload: IChangeEmailPayload) => {
 	const isUserExist = await prisma.user.findUnique({
 		where: {
 			id: user.userId,
@@ -100,7 +99,6 @@ const changeEmail = async (user: IRequestUser, payload: IChangeEmailPayload, ses
 		throw new AppError(status.NOT_FOUND, "User not found");
 	}
 
-	// check if email already taken
 	const isEmailTaken = await prisma.user.findUnique({
 		where: { email: payload.newEmail },
 	});
@@ -109,14 +107,20 @@ const changeEmail = async (user: IRequestUser, payload: IChangeEmailPayload, ses
 		throw new AppError(status.CONFLICT, "Email already taken");
 	}
 
-	await auth.api.changeEmail({
-		body: {
-			newEmail: payload.newEmail,
-			callbackURL: `${envVars.FRONTEND_URL}/verify-email`,
+	await prisma.user.update({
+		where: { id: user.userId },
+		data: {
+			email: payload.newEmail,
+			emailVerified: false,
+			lastOtpSentAt: new Date(),
 		},
-		headers: new Headers({
-			Authorization: `Bearer ${sessionToken}`,
-		}),
+	});
+
+	await auth.api.sendVerificationOTP({
+		body: {
+			email: payload.newEmail,
+			type: "email-verification",
+		},
 	});
 };
 

@@ -12,24 +12,16 @@ export const checkAuth =
 	(...authRoles: Role[]) =>
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			//Session Token Verification
+			// --- Session Token Auth (better-auth / OAuth) ---
 			const sessionToken = CookieUtils.getCookie(req, "better-auth.session_token");
-
-			if (!sessionToken) {
-				throw new Error("Unauthorized access! No session token provided.");
-			}
 
 			if (sessionToken) {
 				const sessionExists = await prisma.session.findFirst({
 					where: {
 						token: sessionToken,
-						expiresAt: {
-							gt: new Date(),
-						},
+						expiresAt: { gt: new Date() },
 					},
-					include: {
-						user: true,
-					},
+					include: { user: true },
 				});
 
 				if (sessionExists && sessionExists.user) {
@@ -46,7 +38,6 @@ export const checkAuth =
 						res.setHeader("X-Session-Refresh", "true");
 						res.setHeader("X-Session-Expires-At", expiresAt.toISOString());
 						res.setHeader("X-Time-Remaining", timeRemaining.toString());
-
 						console.log("Session Expiring Soon!!");
 					}
 
@@ -65,25 +56,16 @@ export const checkAuth =
 						);
 					}
 
-					req.user = {
-						userId: user.id,
-						role: user.role,
-						email: user.email,
-					};
-				}
-
-				const accessToken = CookieUtils.getCookie(req, "accessToken");
-
-				if (!accessToken) {
-					throw new AppError(status.UNAUTHORIZED, "Unauthorized access! No access token provided.");
+					req.user = { userId: user.id, role: user.role, email: user.email };
+					return next();
 				}
 			}
 
-			//Access Token Verification
+			// --- JWT Access Token Auth (traditional login) ---
 			const accessToken = CookieUtils.getCookie(req, "accessToken");
 
 			if (!accessToken) {
-				throw new AppError(status.UNAUTHORIZED, "Unauthorized access! No access token provided.");
+				throw new AppError(status.UNAUTHORIZED, "Unauthorized access! No token provided.");
 			}
 
 			const verifiedToken = jwtUtils.verifyToken(accessToken, envVars.ACCESS_TOKEN_SECRET);
@@ -95,6 +77,7 @@ export const checkAuth =
 			if (authRoles.length > 0 && !authRoles.includes(verifiedToken.data!.role as Role)) {
 				throw new AppError(status.FORBIDDEN, "Forbidden access! You do not have permission to access this resource.");
 			}
+
 			req.user = {
 				userId: verifiedToken.data!.userId,
 				role: verifiedToken.data!.role as Role,

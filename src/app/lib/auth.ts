@@ -43,6 +43,24 @@ export const auth = betterAuth({
 	},
 
 	user: {
+		changeEmail: {
+			enabled: true,
+			sendChangeEmailVerification: async ({ newEmail, url }: { newEmail: string; url: string }) => {
+				try {
+					await sendEmail({
+						to: newEmail,
+						subject: "Verify your new email - CineTube",
+						templateName: "change-email",
+						templateData: {
+							newEmail,
+							url,
+						},
+					});
+				} catch (error) {
+					console.error("[changeEmail] Failed to send verification email:", error);
+				}
+			},
+		},
 		additionalFields: {
 			role: {
 				type: "string",

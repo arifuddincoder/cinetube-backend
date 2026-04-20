@@ -51,9 +51,8 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 const changeEmail = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user;
 	const payload = req.body;
-	const sessionToken = req.cookies["better-auth.session_token"];
 
-	await UserService.changeEmail(user, payload, sessionToken);
+	await UserService.changeEmail(user, payload);
 
 	sendResponse(res, {
 		httpStatusCode: status.OK,
