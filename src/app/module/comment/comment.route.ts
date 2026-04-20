@@ -7,6 +7,9 @@ import { createCommentZodSchema, updateCommentZodSchema } from "./comment.valida
 
 const router = Router();
 
+// admin routes
+router.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), CommentController.getAllComments);
+
 // public routes
 router.get("/review/:reviewId", CommentController.getCommentsByReview);
 

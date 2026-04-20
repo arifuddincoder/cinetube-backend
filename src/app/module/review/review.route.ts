@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Role } from "../../../generated/prisma/enums";
 import { checkAuth } from "../../middleware/checkAuth";
+import { optionalCheckAuth } from "../../middleware/optionalCheckAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { ReviewController } from "./review.controller";
 import { createReviewZodSchema, updateReviewStatusZodSchema, updateReviewZodSchema } from "./review.validation";
@@ -39,6 +40,6 @@ router.patch(
 	validateRequest(updateReviewStatusZodSchema),
 	ReviewController.updateReviewStatus,
 );
-router.get("/movie/:movieId", ReviewController.getReviewsByMovie);
+router.get("/movie/:movieId", optionalCheckAuth, ReviewController.getReviewsByMovie);
 
 export const ReviewRoutes = router;

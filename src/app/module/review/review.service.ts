@@ -12,8 +12,11 @@ const getAllReviews = async (query: IQueryParams) => {
 		searchableFields: ["content"],
 		filterableFields: ["status", "movieId", "userId", "hasSpoiler"],
 	})
-		.where({
-			isDeleted: false,
+		.where({ isDeleted: false })
+		.include({
+			user: { select: { id: true, name: true, email: true } },
+			movie: { select: { id: true, title: true } },
+			_count: { select: { likes: true, comments: { where: { isDeleted: false } } } },
 		})
 		.search()
 		.filter()
@@ -330,24 +333,28 @@ const deleteReview = async (user: IRequestUser, id: string) => {
 
 	return review;
 };
-const getReviewsByMovie = async (movieId: string, query: IQueryParams) => {
-	return await new QueryBuilder(prisma.review, query, {})
-		.where({ movieId, isDeleted: false })
+const getReviewsByMovie = async (movieId: string, query: IQueryParams, currentUser?: IRequestUser) => {
+	const result = await new QueryBuilder(prisma.review, query, {})
+		.where({ movieId, isDeleted: false, status: ReviewStatus.PUBLISHED })
 		.sort()
 		.paginate()
 		.include({
-			user: {
-				select: {
-					id: true,
-					name: true,
-					image: true,
-				},
-			},
-			tags: {
-				include: { tag: true },
-			},
+			user: { select: { id: true, name: true, image: true } },
+			tags: { include: { tag: true } },
+			likes: { select: { userId: true } },
+			_count: { select: { comments: { where: { isDeleted: false } } } },
 		})
 		.execute();
+
+	const data = (result.data as any[]).map((review) => ({
+		...review,
+		totalLikes: review.likes?.length ?? 0,
+		isLikedByCurrentUser: currentUser
+			? (review.likes ?? []).some((l: { userId: string }) => l.userId === currentUser.userId)
+			: false,
+	}));
+
+	return { ...result, data };
 };
 export const ReviewService = {
 	getAllReviews,

@@ -59,7 +59,21 @@ const deleteComment = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getAllComments = catchAsync(async (req: Request, res: Response) => {
+	const query = req.query as IQueryParams;
+	const result = await CommentService.getAllComments(query);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Comments fetched successfully",
+		data: result.data,
+		meta: result.meta,
+	});
+});
+
 export const CommentController = {
+	getAllComments,
 	getCommentsByReview,
 	createComment,
 	updateComment,

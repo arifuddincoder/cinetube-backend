@@ -216,6 +216,15 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 
 	const amount = purchaseType === PurchaseType.RENT ? movie.rentPrice : movie.buyPrice;
 
+	// Stripe minimum is $0.50 USD; 1 BDT ≈ $0.0081, so minimum is ~৳62
+	const STRIPE_MIN_BDT = 62;
+	if (amount < STRIPE_MIN_BDT) {
+		throw new AppError(
+			status.BAD_REQUEST,
+			`Minimum transaction amount is ৳${STRIPE_MIN_BDT}. Please contact support.`,
+		);
+	}
+
 	// create or get stripe customer
 	let stripeCustomerId = isUserExist.stripeCustomerId;
 
@@ -246,32 +255,38 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 	});
 
 	// create stripe checkout session
-	const session = await stripe.checkout.sessions.create({
-		customer: stripeCustomerId,
-		payment_method_types: ["card"],
-		line_items: [
-			{
-				price_data: {
-					currency: "bdt",
-					product_data: {
-						name: `${movie.title} - ${purchaseType === PurchaseType.RENT ? `Rent (${rentalDuration})` : "Buy"}`,
+	let session;
+	try {
+		session = await stripe.checkout.sessions.create({
+			customer: stripeCustomerId,
+			payment_method_types: ["card"],
+			line_items: [
+				{
+					price_data: {
+						currency: "bdt",
+						product_data: {
+							name: `${movie.title} - ${purchaseType === PurchaseType.RENT ? `Rent (${rentalDuration})` : "Buy"}`,
+						},
+						unit_amount: Math.round(amount * 100),
 					},
-					unit_amount: Math.round(amount * 100), // Stripe amount in paisa
+					quantity: 1,
 				},
-				quantity: 1,
+			],
+			mode: "payment",
+			success_url: `${envVars.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${envVars.FRONTEND_URL}/payment/cancel`,
+			metadata: {
+				paymentId: payment.id,
+				userId: user.userId,
+				movieId,
+				purchaseType,
+				rentalDuration: rentalDuration || "",
 			},
-		],
-		mode: "payment",
-		success_url: `${envVars.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-		cancel_url: `${envVars.FRONTEND_URL}/payment/cancel`,
-		metadata: {
-			paymentId: payment.id,
-			userId: user.userId,
-			movieId,
-			purchaseType,
-			rentalDuration: rentalDuration || "",
-		},
-	});
+		});
+	} catch (stripeError: any) {
+		await prisma.payment.delete({ where: { id: payment.id } });
+		throw new AppError(status.BAD_REQUEST, stripeError?.raw?.message || "Payment session creation failed");
+	}
 
 	// update payment with session id
 	await prisma.payment.update({

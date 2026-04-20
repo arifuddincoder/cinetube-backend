@@ -111,7 +111,7 @@ const deleteReview = catchAsync(async (req: Request, res: Response) => {
 });
 const getReviewsByMovie = catchAsync(async (req: Request, res: Response) => {
 	const { movieId } = req.params;
-	const result = await ReviewService.getReviewsByMovie(movieId as string, req.query as any);
+	const result = await ReviewService.getReviewsByMovie(movieId as string, req.query as any, req.user);
 
 	sendResponse(res, {
 		httpStatusCode: status.OK,

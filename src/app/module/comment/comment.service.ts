@@ -169,7 +169,31 @@ const deleteComment = async (user: IRequestUser, id: string) => {
 	return comment;
 };
 
+const getAllComments = async (query: IQueryParams) => {
+	const result = await new QueryBuilder(prisma.comment, query, {
+		searchableFields: ["content"],
+		filterableFields: [],
+	})
+		.where({ isDeleted: false })
+		.include({
+			user: { select: { id: true, name: true, email: true } },
+			review: {
+				select: {
+					id: true,
+					movie: { select: { id: true, title: true } },
+				},
+			},
+		})
+		.search()
+		.sort()
+		.paginate()
+		.execute();
+
+	return result;
+};
+
 export const CommentService = {
+	getAllComments,
 	getCommentsByReview,
 	createComment,
 	updateComment,

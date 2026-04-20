@@ -12,6 +12,7 @@ import { ReviewLikeRoutes } from "../module/reviewLike/reviewLike.route";
 import { CommentRoutes } from "../module/comment/comment.route";
 import { UserRoutes } from "../module/user/user.route";
 import { PaymentRoutes } from "../module/payment/payment.route";
+import { StatsRoutes } from "../module/stats/stats.route";
 
 const router = Router();
 
@@ -28,4 +29,5 @@ router.use("/review-likes", ReviewLikeRoutes);
 router.use("/comments", CommentRoutes);
 router.use("/users", UserRoutes);
 router.use("/payments", PaymentRoutes);
+router.use("/stats", StatsRoutes);
 export const IndexRoutes = router;
