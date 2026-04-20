@@ -1,21 +1,24 @@
 model Movie {
-  id           String          @id @default(uuid(7))
-  title        String          @db.VarChar(200)
-  synopsis     String          @db.Text
-  releaseYear  Int
-  director     String          @db.VarChar(100)
-  posterImage  String?
-  trailerUrl   String?
-  streamingUrl String?
-  pricingType  PricingType     @default(FREE)
-  rentPrice    Float           @default(0)
-  buyPrice     Float           @default(0)
-  rentDuration RentalDuration?
-  isFeatured   Boolean         @default(false)
-  isDeleted    Boolean         @default(false)
-  deletedAt    DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id            String          @id @default(uuid(7))
+  title         String          @db.VarChar(200)
+  synopsis      String          @db.Text
+  releaseYear   Int
+  director      String          @db.VarChar(100)
+  posterImage   String?
+  trailerUrl    String?
+  streamingUrl  String?
+  pricingType   PricingType     @default(FREE)
+  rentPrice     Float           @default(0)
+  buyPrice      Float           @default(0)
+  rentDuration  RentalDuration?
+  isFeatured    Boolean         @default(false)
+  averageRating Float?          @default(0)
+  totalReviews  Int             @default(0)
+  totalLikes    Int             @default(0)
+  isDeleted     Boolean         @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   genres     MovieGenre[]
   platforms  MoviePlatform[]

@@ -258,6 +258,22 @@ const submitReview = async (user: IRequestUser, id: string) => {
 	return review;
 };
 
+const updateMovieStats = async (movieId: string) => {
+	const stats = await prisma.review.aggregate({
+		where: { movieId, status: ReviewStatus.PUBLISHED, isDeleted: false },
+		_avg: { rating: true },
+		_count: { rating: true },
+	});
+
+	await prisma.movie.update({
+		where: { id: movieId },
+		data: {
+			averageRating: stats._avg.rating ?? 0,
+			totalReviews: stats._count.rating,
+		},
+	});
+};
+
 const updateReviewStatus = async (id: string, payload: IUpdateReviewStatusPayload) => {
 	const isReviewExist = await prisma.review.findUnique({
 		where: { id, isDeleted: false },
@@ -280,6 +296,9 @@ const updateReviewStatus = async (id: string, payload: IUpdateReviewStatusPayloa
 			unpublishReason: payload.status === ReviewStatus.PUBLISHED ? null : payload.unpublishReason,
 		},
 	});
+
+	// movie stats update
+	await updateMovieStats(isReviewExist.movieId);
 
 	return review;
 };
@@ -312,12 +331,22 @@ const deleteReview = async (user: IRequestUser, id: string) => {
 	return review;
 };
 const getReviewsByMovie = async (movieId: string, query: IQueryParams) => {
-	return await new QueryBuilder(prisma.review, query, {
-		filterableFields: ["status"],
-	})
+	return await new QueryBuilder(prisma.review, query, {})
 		.where({ movieId, isDeleted: false })
 		.sort()
 		.paginate()
+		.include({
+			user: {
+				select: {
+					id: true,
+					name: true,
+					image: true,
+				},
+			},
+			tags: {
+				include: { tag: true },
+			},
+		})
 		.execute();
 };
 export const ReviewService = {

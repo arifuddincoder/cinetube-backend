@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "movies" ADD COLUMN     "averageRating" DOUBLE PRECISION DEFAULT 0,
+ADD COLUMN     "totalLikes" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "totalReviews" INTEGER NOT NULL DEFAULT 0;
