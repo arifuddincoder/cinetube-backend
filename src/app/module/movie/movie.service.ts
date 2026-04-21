@@ -91,6 +91,11 @@ const getAllMovies = async (query: IQueryParams) => {
 		},
 	)
 		.where(whereClause)
+		.include({
+			_count: {
+				select: { watchlists: true },
+			},
+		})
 		.filter()
 		.sort()
 		.paginate()
@@ -114,6 +119,11 @@ const getMovieById = async (id: string) => {
 			genres: {
 				include: {
 					genre: true,
+				},
+			},
+			_count: {
+				select: {
+					watchlists: true,
 				},
 			},
 			platforms: {
