@@ -57,6 +57,22 @@ const registerUser = async (payload: IRegisterUserPayload) => {
 const loginUser = async (payload: ILoginUserPayload) => {
 	const { email, password } = payload;
 
+	// Pre-check user status before better-auth signIn so blocked/deleted users
+	// get the correct error instead of better-auth's email-verification error.
+	const existingUser = await prisma.user.findUnique({
+		where: { email },
+		select: { status: true, isDeleted: true },
+	});
+
+	if (existingUser) {
+		if (existingUser.isDeleted || existingUser.status === UserStatus.DELETED) {
+			throw new AppError(status.NOT_FOUND, "User is deleted");
+		}
+		if (existingUser.status === UserStatus.BLOCKED) {
+			throw new AppError(status.FORBIDDEN, "User is blocked. Please contact support.");
+		}
+	}
+
 	const data = await auth.api.signInEmail({
 		body: {
 			email,
@@ -69,7 +85,7 @@ const loginUser = async (payload: ILoginUserPayload) => {
 	}
 
 	if (data.user.status === UserStatus.BLOCKED) {
-		throw new AppError(status.FORBIDDEN, "User is blocked");
+		throw new AppError(status.FORBIDDEN, "User is blocked. Please contact support.");
 	}
 
 	const accessToken = tokenUtils.getAccessToken({

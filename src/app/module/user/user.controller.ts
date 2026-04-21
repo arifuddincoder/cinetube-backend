@@ -60,10 +60,62 @@ const changeEmail = catchAsync(async (req: Request, res: Response) => {
 		message: "Verification email sent to new email address",
 	});
 });
+const changeUserStatus = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const user = req.user;
+	const result = await UserService.changeUserStatus(payload, user);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "User status changed successfully",
+		data: result,
+	});
+});
+
+const changeUserRole = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const user = req.user;
+	const result = await UserService.changeUserRole(payload, user);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "User role changed successfully",
+		data: result,
+	});
+});
+const deleteUser = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const user = req.user;
+	await UserService.deleteUser(id as string, user);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "User deleted successfully",
+	});
+});
+
+const hardDeleteUser = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const user = req.user;
+	await UserService.hardDeleteUser(id as string, user);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "User permanently deleted successfully",
+	});
+});
 
 export const UserController = {
 	getAllUsers,
 	getUserById,
 	updateMyProfile,
 	changeEmail,
+	deleteUser,
+	hardDeleteUser,
+	changeUserStatus,
+	changeUserRole,
 };

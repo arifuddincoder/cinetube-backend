@@ -3,12 +3,7 @@ import { Role, UserStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import {
-	IChangeUserRolePayload,
-	IChangeUserStatusPayload,
-	ICreateAdminPayload,
-	IUpdateAdminPayload,
-} from "./admin.interface";
+import { ICreateAdminPayload, IUpdateAdminPayload } from "./admin.interface";
 import { IQueryParams } from "../../interfaces/query.interface";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 
@@ -157,6 +152,10 @@ const deleteAdmin = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Admin not found");
 	}
 
+	if (isAdminExist.id === id) {
+		throw new AppError(status.BAD_REQUEST, "You cannot delete yourself");
+	}
+
 	const admin = await prisma.user.update({
 		where: { id },
 		data: {
@@ -166,72 +165,6 @@ const deleteAdmin = async (id: string) => {
 		},
 	});
 	return admin;
-};
-
-const changeUserStatus = async (payload: IChangeUserStatusPayload) => {
-	const { userId, status: userStatus } = payload;
-
-	const isUserExist = await prisma.user.findUnique({
-		where: {
-			id: userId,
-			isDeleted: false,
-		},
-	});
-
-	if (!isUserExist) {
-		throw new AppError(status.NOT_FOUND, "User not found");
-	}
-
-	if (isUserExist.role === Role.SUPER_ADMIN) {
-		throw new AppError(status.FORBIDDEN, "Cannot change super admin status");
-	}
-
-	const updated = await prisma.user.update({
-		where: { id: userId },
-		data: { status: userStatus as UserStatus },
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			role: true,
-			status: true,
-		},
-	});
-
-	return updated;
-};
-
-const changeUserRole = async (payload: IChangeUserRolePayload) => {
-	const { userId, role: userRole } = payload;
-
-	const isUserExist = await prisma.user.findUnique({
-		where: {
-			id: userId,
-			isDeleted: false,
-		},
-	});
-
-	if (!isUserExist) {
-		throw new AppError(status.NOT_FOUND, "User not found");
-	}
-
-	if (isUserExist.role === Role.SUPER_ADMIN) {
-		throw new AppError(status.FORBIDDEN, "Cannot change super admin role");
-	}
-
-	const updated = await prisma.user.update({
-		where: { id: userId },
-		data: { role: userRole as Role },
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			role: true,
-			status: true,
-		},
-	});
-
-	return updated;
 };
 
 const hardDeleteAdmin = async (id: string) => {
@@ -259,7 +192,5 @@ export const AdminService = {
 	createAdmin,
 	updateAdmin,
 	deleteAdmin,
-	changeUserStatus,
-	changeUserRole,
 	hardDeleteAdmin,
 };

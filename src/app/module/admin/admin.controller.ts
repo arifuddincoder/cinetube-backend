@@ -67,29 +67,6 @@ const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const changeUserStatus = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
-	const result = await AdminService.changeUserStatus(payload);
-
-	sendResponse(res, {
-		httpStatusCode: status.OK,
-		success: true,
-		message: "User status changed successfully",
-		data: result,
-	});
-});
-
-const changeUserRole = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
-	const result = await AdminService.changeUserRole(payload);
-
-	sendResponse(res, {
-		httpStatusCode: status.OK,
-		success: true,
-		message: "User role changed successfully",
-		data: result,
-	});
-});
 const hardDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
 	const { id } = req.params;
 	const result = await AdminService.hardDeleteAdmin(id as string);
@@ -107,7 +84,5 @@ export const AdminController = {
 	createAdmin,
 	updateAdmin,
 	deleteAdmin,
-	changeUserStatus,
-	changeUserRole,
 	hardDeleteAdmin,
 };
