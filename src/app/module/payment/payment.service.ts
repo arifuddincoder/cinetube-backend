@@ -60,9 +60,11 @@ const getMyPayments = async (user: IRequestUser, query: IQueryParams) => {
 
 const getAllPayments = async (query: IQueryParams) => {
 	const result = await new QueryBuilder(prisma.payment, query, {
-		searchableFields: [],
-		filterableFields: ["status", "purchaseType", "planType", "userId"],
+		searchableFields: ["transactionId", "user.name", "user.email", "movie.title"],
+		filterableFields: ["purchaseType", "planType", "status"],
 	})
+		.search()
+		.filter()
 		.include({
 			user: {
 				select: {
@@ -219,10 +221,7 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 	// Stripe minimum is $0.50 USD; 1 BDT ≈ $0.0081, so minimum is ~৳62
 	const STRIPE_MIN_BDT = 62;
 	if (amount < STRIPE_MIN_BDT) {
-		throw new AppError(
-			status.BAD_REQUEST,
-			`Minimum transaction amount is ৳${STRIPE_MIN_BDT}. Please contact support.`,
-		);
+		throw new AppError(status.BAD_REQUEST, `Minimum transaction amount is ৳${STRIPE_MIN_BDT}. Please contact support.`);
 	}
 
 	// create or get stripe customer
