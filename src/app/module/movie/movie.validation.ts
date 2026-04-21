@@ -3,7 +3,6 @@ import { PricingType, RentalDuration } from "../../../generated/prisma/enums";
 
 const rentalDurationValues = Object.values(RentalDuration) as [string, ...string[]];
 
-// FormData থেকে array handle করার helper
 const stringOrArray = z.union([z.string(), z.array(z.string())]).transform((val) => (Array.isArray(val) ? val : [val]));
 
 export const createMovieZodSchema = z.object({

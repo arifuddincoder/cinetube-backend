@@ -133,7 +133,6 @@ const createReview = async (user: IRequestUser, payload: ICreateReviewPayload) =
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	// check if user already has a review for this movie
 	const isReviewExist = await prisma.review.findFirst({
 		where: {
 			userId: user.userId,
@@ -191,12 +190,10 @@ const updateReview = async (user: IRequestUser, id: string, payload: IUpdateRevi
 		throw new AppError(status.NOT_FOUND, "Review not found");
 	}
 
-	// only owner can update
 	if (isReviewExist.userId !== user.userId) {
 		throw new AppError(status.FORBIDDEN, "You are not allowed to update this review");
 	}
 
-	// only DRAFT or PENDING review can be updated
 	if (isReviewExist.status !== ReviewStatus.DRAFT && isReviewExist.status !== ReviewStatus.PENDING) {
 		throw new AppError(status.BAD_REQUEST, "Only draft or pending reviews can be updated");
 	}
@@ -300,7 +297,6 @@ const updateReviewStatus = async (id: string, payload: IUpdateReviewStatusPayloa
 		},
 	});
 
-	// movie stats update
 	await updateMovieStats(isReviewExist.movieId);
 
 	return review;

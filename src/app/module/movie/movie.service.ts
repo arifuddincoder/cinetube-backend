@@ -400,7 +400,6 @@ const getTopRatedMovies = async (limit = 3) => {
 	return moviesWithRating.sort((a, b) => b.averageRating - a.averageRating).slice(0, limit);
 };
 
-// movie.service.ts এ যোগ করো
 const getMovieFilters = async () => {
 	const movies = await prisma.movie.findMany({
 		where: { isDeleted: false },

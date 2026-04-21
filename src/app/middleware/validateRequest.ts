@@ -1,4 +1,3 @@
-// validateRequest.ts
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
 
@@ -9,7 +8,7 @@ export const validateRequest = (zodSchema: z.ZodObject<any>) => {
 			req.body = JSON.parse(req.body.data);
 		}
 
-		const parsedResult = zodSchema.safeParse(req.body); // req.body
+		const parsedResult = zodSchema.safeParse(req.body);
 
 		if (!parsedResult.success) {
 			return next(parsedResult.error);

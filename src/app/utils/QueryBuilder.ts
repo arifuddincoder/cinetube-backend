@@ -10,7 +10,6 @@ import {
 	PrismaWhereConditions,
 } from "../interfaces/query.interface";
 
-// T = Model Type
 export class QueryBuilder<T, TWhereInput = Record<string, unknown>, TInclude = Record<string, unknown>> {
 	private query: PrismaFindManyArgs;
 	private countQuery: PrismaCountArgs;
@@ -192,14 +191,12 @@ export class QueryBuilder<T, TWhereInput = Record<string, unknown>, TInclude = R
 				return;
 			}
 
-			// Range filter parsing
 			if (typeof value === "object" && value !== null && !Array.isArray(value)) {
 				queryWhere[key] = this.parseRangeFilter(value as Record<string, string | number>);
 				countQueryWhere[key] = this.parseRangeFilter(value as Record<string, string | number>);
 				return;
 			}
 
-			//direct value parsing
 			queryWhere[key] = this.parseFilterValue(value);
 			countQueryWhere[key] = this.parseFilterValue(value);
 		});
@@ -226,8 +223,6 @@ export class QueryBuilder<T, TWhereInput = Record<string, unknown>, TInclude = R
 
 		this.sortBy = sortBy;
 		this.sortOrder = sortOrder;
-
-		// /doctors?sortBy=user.name&sortOrder=asc => orderBy: { user: { name: 'asc' } }
 
 		if (sortBy.includes(".")) {
 			const parts = sortBy.split(".");
@@ -288,7 +283,6 @@ export class QueryBuilder<T, TWhereInput = Record<string, unknown>, TInclude = R
 			return this;
 		}
 
-		//if fields method is, include method will be ignored to prevent conflict between select and include
 		this.query.include = {
 			...(this.query.include as Record<string, unknown>),
 			...(relation as Record<string, unknown>),

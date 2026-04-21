@@ -111,7 +111,6 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 
 	const priceConfig = SUBSCRIPTION_PRICES[planType];
 
-	// create or get stripe customer
 	let stripeCustomerId = isUserExist.stripeCustomerId;
 
 	if (!stripeCustomerId) {
@@ -127,7 +126,6 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 		});
 	}
 
-	// create payment record
 	const payment = await prisma.payment.create({
 		data: {
 			userId: user.userId,
@@ -139,7 +137,6 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 		},
 	});
 
-	// create stripe checkout session
 	const session = await stripe.checkout.sessions.create({
 		customer: stripeCustomerId,
 		payment_method_types: ["card"],
@@ -160,7 +157,6 @@ const createSubscriptionCheckout = async (user: IRequestUser, payload: ICreateSu
 		},
 	});
 
-	// update payment with session id
 	await prisma.payment.update({
 		where: { id: payment.id },
 		data: { stripeSessionId: session.id },
@@ -192,7 +188,6 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 		throw new AppError(status.BAD_REQUEST, "This movie is not available for purchase");
 	}
 
-	// check if already bought
 	if (purchaseType === PurchaseType.BUY) {
 		const existingPurchase = await prisma.payment.findFirst({
 			where: {
@@ -218,13 +213,11 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 
 	const amount = purchaseType === PurchaseType.RENT ? movie.rentPrice : movie.buyPrice;
 
-	// Stripe minimum is $0.50 USD; 1 BDT ≈ $0.0081, so minimum is ~৳62
 	const STRIPE_MIN_BDT = 62;
 	if (amount < STRIPE_MIN_BDT) {
 		throw new AppError(status.BAD_REQUEST, `Minimum transaction amount is ৳${STRIPE_MIN_BDT}. Please contact support.`);
 	}
 
-	// create or get stripe customer
 	let stripeCustomerId = isUserExist.stripeCustomerId;
 
 	if (!stripeCustomerId) {
@@ -240,7 +233,6 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 		});
 	}
 
-	// create payment record
 	const payment = await prisma.payment.create({
 		data: {
 			userId: user.userId,
@@ -253,7 +245,6 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 		},
 	});
 
-	// create stripe checkout session
 	let session;
 	try {
 		session = await stripe.checkout.sessions.create({
@@ -287,7 +278,6 @@ const createRentOrBuyCheckout = async (user: IRequestUser, payload: ICreateRentO
 		throw new AppError(status.BAD_REQUEST, stripeError?.raw?.message || "Payment session creation failed");
 	}
 
-	// update payment with session id
 	await prisma.payment.update({
 		where: { id: payment.id },
 		data: { stripeSessionId: session.id },
@@ -354,7 +344,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 					rentExpiresAt.setDate(rentExpiresAt.getDate() + days);
 				}
 
-				// generate pdf
 				try {
 					pdfBuffer = await generateInvoicePdf({
 						invoiceId: paymentId,
@@ -389,7 +378,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 				return { updatedPayment, subscriptionEndsAt, rentExpiresAt };
 			});
 
-			// send invoice email
 			try {
 				await sendEmail({
 					to: payment.user.email,
@@ -438,7 +426,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 
 			if (!payment) break;
 
-			// first invoice.paid is for initial subscription — skip if already handled by checkout.session.completed
 			const isFirstPayment = await prisma.payment.findFirst({
 				where: {
 					subscriptionId,
@@ -482,7 +469,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 				}),
 			]);
 
-			// generate pdf for renewal
 			try {
 				pdfBuffer = await generateInvoicePdf({
 					invoiceId: newPayment.id,
@@ -499,7 +485,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 				console.error("Error generating renewal PDF:", pdfError);
 			}
 
-			// send renewal email
 			try {
 				await sendEmail({
 					to: payment.user.email,
@@ -591,7 +576,6 @@ const checkMovieAccess = async (user: IRequestUser, movieId: string) => {
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	// free movie
 	if (movie.pricingType === "FREE") {
 		return { hasAccess: true, accessType: "FREE" };
 	}
@@ -600,7 +584,6 @@ const checkMovieAccess = async (user: IRequestUser, movieId: string) => {
 		where: { id: user.userId },
 	});
 
-	// active subscription
 	if (
 		userRecord?.subscriptionStatus === "ACTIVE" &&
 		userRecord?.subscriptionEndsAt &&
@@ -609,7 +592,6 @@ const checkMovieAccess = async (user: IRequestUser, movieId: string) => {
 		return { hasAccess: true, accessType: "SUBSCRIPTION" };
 	}
 
-	// bought
 	const bought = await prisma.payment.findFirst({
 		where: {
 			userId: user.userId,
@@ -623,7 +605,6 @@ const checkMovieAccess = async (user: IRequestUser, movieId: string) => {
 		return { hasAccess: true, accessType: "BOUGHT" };
 	}
 
-	// rented and not expired
 	const rented = await prisma.payment.findFirst({
 		where: {
 			userId: user.userId,

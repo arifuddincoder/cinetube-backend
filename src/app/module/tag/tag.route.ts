@@ -7,11 +7,9 @@ import { createTagZodSchema, updateTagZodSchema } from "./tag.validation";
 
 const router = Router();
 
-// public routes
 router.get("/", TagController.getAllTags);
 router.get("/:id", TagController.getTagById);
 
-// admin only routes
 router.post("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), validateRequest(createTagZodSchema), TagController.createTag);
 
 router.patch(

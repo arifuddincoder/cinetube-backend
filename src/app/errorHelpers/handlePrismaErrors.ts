@@ -3,57 +3,46 @@ import { Prisma } from "../../generated/prisma/client";
 import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
 
 const getStatusCodeFromPrismaError = (errorCode: string): number => {
-	//P2002: Unique constraint failed
 	if (errorCode === "P2002") {
 		return status.CONFLICT;
 	}
 
-	// P2025, P2001, P2015, P2018 : Not Found errors
 	if (["P2025", "P2001", "P2015", "P2018"].includes(errorCode)) {
 		return status.NOT_FOUND;
 	}
 
-	// P1000 , P6002 : DB Authentication errors = 401 Unauthorized
 	if (["P1000", "P6002"].includes(errorCode)) {
 		return status.UNAUTHORIZED;
 	}
 
-	// P1010 , P6010 : Access denied errors = 403 Forbidden
 	if (["P1010", "P6010"].includes(errorCode)) {
 		return status.FORBIDDEN;
 	}
 
-	// P6003 : Prisma Accelararate Plan limit exceeded = 402 Payment Required
 	if (errorCode === "P6003") {
 		return status.PAYMENT_REQUIRED;
 	}
 
-	// P1008, 2004, 6004 : Timeout errors = 504 Gateway Timeout
 	if (["P1008", "P2004", "P6004"].includes(errorCode)) {
 		return status.GATEWAY_TIMEOUT;
 	}
 
-	// P5011 : Rate Limit Exceeded = 429 Too Many Requests
 	if (errorCode === "P5011") {
 		return status.TOO_MANY_REQUESTS;
 	}
 
-	// P6009 Response size limit exceeded = 413 Payload Too Large
 	if (errorCode === "P6009") {
 		return 413;
 	}
 
-	// P1xxx , P2024, P2037, P6008 : Connection errors
 	if (errorCode.startsWith("P1") || ["P2024", "P2037", "P6008"].includes(errorCode)) {
 		return status.SERVICE_UNAVAILABLE;
 	}
 
-	// P2XXX : except unhandled errors, Bad Request
 	if (errorCode.startsWith("P2")) {
 		return status.BAD_REQUEST;
 	}
 
-	// P3XXX, P4XXX : Internal Server Errors
 	if (errorCode.startsWith("P3") || errorCode.startsWith("P4")) {
 		return status.INTERNAL_SERVER_ERROR;
 	}
@@ -107,10 +96,7 @@ export const handlePrismaClientKnownRequestError = (error: Prisma.PrismaClientKn
 
 	let cleanMessage = error.message;
 
-	// Remove the "Invalid `prisma.user.create()` invocation: " part from the message for better readability
 	cleanMessage = cleanMessage.replace(/Invalid `.*?` invocation:?\s*/i, "");
-
-	// split by new line and take the first line as the main message, rest can be added to error sources
 
 	const lines = cleanMessage.split("\n").filter((line) => line.trim());
 	const mainMessage = lines[0] || "An error occurred with the database operation.";
@@ -140,7 +126,6 @@ export const handlePrismaClientKnownRequestError = (error: Prisma.PrismaClientKn
 export const handlePrismaClientUnknownError = (error: Prisma.PrismaClientUnknownRequestError): TErrorResponse => {
 	let cleanMessage = error.message;
 
-	// Remove the "Invalid `prisma.user.create()` invocation: " part from the message for better readability
 	cleanMessage = cleanMessage.replace(/Invalid `.*?` invocation:?\s*/i, "");
 
 	const lines = cleanMessage.split("\n").filter((line) => line.trim());
@@ -164,19 +149,14 @@ export const handlePrismaClientUnknownError = (error: Prisma.PrismaClientUnknown
 export const handlePrismaClientValidationError = (error: Prisma.PrismaClientValidationError): TErrorResponse => {
 	let cleanMessage = error.message;
 
-	// Remove the "Invalid `prisma.user.create()` invocation: " part from the message for better readability
 	cleanMessage = cleanMessage.replace(/Invalid `.*?` invocation:?\s*/i, "");
 
 	const lines = cleanMessage.split("\n").filter((line) => line.trim());
 
 	const errorSources: TErrorSources[] = [];
 
-	// extract field name for field-specific validation errors
-	// Example message: "Argument `data.email`: Got invalid value `invalid-email` on prisma.user.create()"
 	const fieldMatch = cleanMessage.match(/Argument `(\w+)`/i);
 	const fieldName = fieldMatch ? fieldMatch[1] : "Unknown Field";
-
-	//main message
 
 	const mainMessage =
 		lines.find((line) => !line.includes("Argument") && !line.includes("→") && line.length > 10) ||

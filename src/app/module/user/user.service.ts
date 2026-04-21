@@ -66,7 +66,6 @@ const updateMyProfile = async (user: IRequestUser, payload: IUpdateUserPayload) 
 		throw new AppError(status.NOT_FOUND, "User not found");
 	}
 
-	// পুরনো image delete করো
 	if (payload.image && isUserExist.image) {
 		await deleteFileFromCloudinary(isUserExist.image);
 	}

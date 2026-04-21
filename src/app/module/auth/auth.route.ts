@@ -31,7 +31,6 @@ router.post("/refresh-token", AuthController.getNewToken);
 router.post("/logout", checkAuth(Role.ADMIN, Role.USER, Role.SUPER_ADMIN), AuthController.logoutUser);
 router.get("/me", checkAuth(Role.ADMIN, Role.USER, Role.SUPER_ADMIN), AuthController.getMe);
 
-// Google OAuth
 router.get("/google", AuthController.googleLogin);
 router.get("/google/success", AuthController.googleLoginSuccess);
 router.get("/google/error", AuthController.handleOAuthError);

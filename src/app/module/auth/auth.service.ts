@@ -57,8 +57,6 @@ const registerUser = async (payload: IRegisterUserPayload) => {
 const loginUser = async (payload: ILoginUserPayload) => {
 	const { email, password } = payload;
 
-	// Pre-check user status before better-auth signIn so blocked/deleted users
-	// get the correct error instead of better-auth's email-verification error.
 	const existingUser = await prisma.user.findUnique({
 		where: { email },
 		select: { status: true, isDeleted: true },
@@ -282,7 +280,6 @@ const resendOtp = async (email: string) => {
 		throw new AppError(status.BAD_REQUEST, "Email already verified");
 	}
 
-	// last OTP sent time check
 	if (user.lastOtpSentAt) {
 		const minutesSinceLastOtp = (Date.now() - new Date(user.lastOtpSentAt).getTime()) / 1000 / 60;
 
@@ -302,7 +299,6 @@ const resendOtp = async (email: string) => {
 		},
 	});
 
-	// update last OTP sent time
 	await prisma.user.update({
 		where: { email },
 		data: { lastOtpSentAt: new Date() },

@@ -7,11 +7,9 @@ import { createPlatformZodSchema, updatePlatformZodSchema } from "./platform.val
 
 const router = Router();
 
-// public routes
 router.get("/", PlatformController.getAllPlatforms);
 router.get("/:id", PlatformController.getPlatformById);
 
-// admin only routes
 router.post(
 	"/",
 	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

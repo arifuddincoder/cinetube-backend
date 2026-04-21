@@ -26,7 +26,6 @@ const toggleLike = async (user: IRequestUser, reviewId: string) => {
 	});
 
 	if (isLiked) {
-		// unlike
 		await prisma.reviewLike.delete({
 			where: {
 				userId_reviewId: {
@@ -39,7 +38,6 @@ const toggleLike = async (user: IRequestUser, reviewId: string) => {
 		return { liked: false };
 	}
 
-	// like
 	await prisma.reviewLike.create({
 		data: {
 			userId: user.userId,

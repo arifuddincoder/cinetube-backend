@@ -23,7 +23,7 @@ const getCommentsByReview = async (reviewId: string, query: IQueryParams) => {
 		.where({
 			reviewId,
 			isDeleted: false,
-			parentId: null, // only top level comments
+			parentId: null,
 		})
 		.include({
 			user: {
@@ -64,7 +64,6 @@ const createComment = async (user: IRequestUser, payload: ICreateCommentPayload)
 		throw new AppError(status.NOT_FOUND, "Review not found");
 	}
 
-	// if reply, check parent comment exists
 	if (parentId) {
 		const isParentExist = await prisma.comment.findUnique({
 			where: { id: parentId, isDeleted: false },
@@ -74,7 +73,6 @@ const createComment = async (user: IRequestUser, payload: ICreateCommentPayload)
 			throw new AppError(status.NOT_FOUND, "Parent comment not found");
 		}
 
-		// only one level of reply allowed
 		if (isParentExist.parentId) {
 			throw new AppError(status.BAD_REQUEST, "Cannot reply to a reply");
 		}
@@ -122,7 +120,6 @@ const updateComment = async (user: IRequestUser, id: string, payload: IUpdateCom
 		throw new AppError(status.NOT_FOUND, "Comment not found");
 	}
 
-	// only owner can update
 	if (isCommentExist.userId !== user.userId) {
 		throw new AppError(status.FORBIDDEN, "You are not allowed to update this comment");
 	}
@@ -153,7 +150,6 @@ const deleteComment = async (user: IRequestUser, id: string) => {
 		throw new AppError(status.NOT_FOUND, "Comment not found");
 	}
 
-	// admin can delete any comment, user can only delete own
 	if (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN && isCommentExist.userId !== user.userId) {
 		throw new AppError(status.FORBIDDEN, "You are not allowed to delete this comment");
 	}

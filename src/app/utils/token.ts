@@ -4,7 +4,6 @@ import { envVars } from "../config/env";
 import { jwtUtils } from "./jwt";
 import { CookieUtils } from "./cookie";
 
-//Creating access token
 const getAccessToken = (payload: JwtPayload) => {
 	const accessToken = jwtUtils.createToken(payload, envVars.ACCESS_TOKEN_SECRET, {
 		expiresIn: envVars.ACCESS_TOKEN_EXPIRES_IN,

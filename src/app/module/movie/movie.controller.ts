@@ -33,7 +33,6 @@ const getMovieById = catchAsync(async (req: Request, res: Response) => {
 const createMovie = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
-	// multer cloudinary storage automatically uploads and gives secure_url
 	if (req.file) {
 		payload.posterImage = (req.file as any).path;
 	}

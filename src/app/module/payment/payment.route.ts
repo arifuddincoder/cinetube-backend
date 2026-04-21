@@ -7,7 +7,6 @@ import { createRentOrBuyZodSchema, createSubscriptionZodSchema } from "./payment
 
 const router = Router();
 
-// user routes
 router.get("/my-payments", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), PaymentController.getMyPayments);
 
 router.post(
@@ -26,7 +25,6 @@ router.post(
 
 router.get("/access/:movieId", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), PaymentController.checkMovieAccess);
 
-// admin routes
 router.get("/", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), PaymentController.getAllPayments);
 
 export const PaymentRoutes = router;

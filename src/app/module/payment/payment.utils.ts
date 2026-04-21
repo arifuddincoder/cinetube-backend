@@ -29,28 +29,22 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 			const margin = 50;
 			const contentWidth = pageWidth - margin * 2;
 
-			// Background
 			doc.rect(0, 0, pageWidth, pageHeight).fill("#f8f8f8");
 
-			// Header Bar
 			doc.rect(0, 0, pageWidth, 110).fill("#1a1a1a");
 
-			// Logo — Cine white, Tube red
 			doc.fontSize(26).font("Helvetica-Bold").fillColor("#ffffff").text("Cine", margin, 40, { continued: true });
 			doc.fillColor("#e50914").text("Tube");
 
-			// INVOICE label — white, right aligned
 			doc.fontSize(12).font("Helvetica").fillColor("#aaaaaa").text("INVOICE", margin, 46, {
 				width: contentWidth,
 				align: "right",
 			});
 
-			// White Card
 			doc.roundedRect(margin - 10, 128, contentWidth + 20, pageHeight - 168, 8).fill("#ffffff");
 
 			let y = 158;
 
-			// Invoice Meta Row
 			doc.fontSize(9).font("Helvetica").fillColor("#aaaaaa").text("INVOICE ID", margin, y);
 			doc
 				.fontSize(9)
@@ -84,18 +78,15 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
 			y += 40;
 
-			// Divider
 			doc.rect(margin, y, contentWidth, 0.5).fill("#eeeeee");
 			y += 20;
 
-			// Billed To — Left
 			doc.fontSize(8).font("Helvetica").fillColor("#aaaaaa").text("BILLED TO", margin, y);
 			y += 14;
 			doc.fontSize(12).font("Helvetica-Bold").fillColor("#1a1a1a").text(data.userName, margin, y);
 			y += 16;
 			doc.fontSize(9).font("Helvetica").fillColor("#666666").text(data.userEmail, margin, y);
 
-			// Transaction — Right (same y level as BILLED TO section)
 			const txY = y - 46;
 			doc
 				.fontSize(8)
@@ -103,7 +94,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 				.fillColor("#aaaaaa")
 				.text("TRANSACTION ID", 0, txY, { width: pageWidth - margin, align: "right" });
 
-			// truncate transaction id if too long
 			const txId = data.transactionId.length > 30 ? data.transactionId.substring(0, 30) + "..." : data.transactionId;
 			doc
 				.fontSize(8)
@@ -124,11 +114,9 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
 			y += 30;
 
-			// Divider
 			doc.rect(margin, y, contentWidth, 0.5).fill("#eeeeee");
 			y += 20;
 
-			// Table Header
 			doc.rect(margin, y, contentWidth, 30).fill("#f5f5f5");
 			doc
 				.fontSize(8)
@@ -142,7 +130,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 				.text("AMOUNT", 0, y + 10, { width: pageWidth - margin - 12, align: "right" });
 			y += 40;
 
-			// Table Rows
 			const addRow = (label: string, value: string, isAmount = false) => {
 				doc
 					.fontSize(10)
@@ -192,7 +179,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
 			y += 16;
 
-			// Total Bar
 			doc.rect(margin, y, contentWidth, 52).fill("#1a1a1a");
 			doc
 				.fontSize(10)
@@ -209,7 +195,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 				});
 			y += 70;
 
-			// PAID Badge
 			doc.rect(margin, y, 64, 22).fill("#f0fdf4");
 			doc.rect(margin, y, 64, 22).strokeColor("#bbf7d0").lineWidth(0.5).stroke();
 			doc
@@ -219,7 +204,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 				.text("✓ PAID", margin + 10, y + 7);
 			y += 44;
 
-			// Footer Divider
 			doc.rect(margin, y, contentWidth, 0.5).fill("#eeeeee");
 			y += 20;
 

@@ -8,11 +8,9 @@ import { createReviewZodSchema, updateReviewStatusZodSchema, updateReviewZodSche
 
 const router = Router();
 
-// public routes
 router.get("/", ReviewController.getAllReviews);
 router.get("/:id", ReviewController.getReviewById);
 
-// user routes
 router.get("/my/reviews", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), ReviewController.getMyReviews);
 
 router.post(
@@ -33,7 +31,6 @@ router.patch("/:id/submit", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), 
 
 router.delete("/:id", checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN), ReviewController.deleteReview);
 
-// admin routes
 router.patch(
 	"/:id/status",
 	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

@@ -16,10 +16,9 @@ app.set("query parser", (str: string) => qs.parse(str));
 app.set("view engine", "ejs");
 app.set("views", path.resolve(process.cwd(), "src/app/templates"));
 
-// Better Auth handler
 app.use("/api/auth", toNodeHandler(auth));
 app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
-// CORS
+
 app.use(
 	cors({
 		origin: [envVars.FRONTEND_URL, "http://localhost:3000"],
@@ -29,15 +28,12 @@ app.use(
 	}),
 );
 
-// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Routes
 app.use("/api/v1", IndexRoutes);
 
-// Error handlers
 app.use(globalErrorHandler);
 app.use(notFound);
 

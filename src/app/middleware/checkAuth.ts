@@ -12,7 +12,6 @@ export const checkAuth =
 	(...authRoles: Role[]) =>
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			// --- Session Token Auth (better-auth / OAuth) ---
 			const sessionToken = CookieUtils.getCookie(req, "better-auth.session_token");
 
 			if (sessionToken) {
@@ -61,7 +60,6 @@ export const checkAuth =
 				}
 			}
 
-			// --- JWT Access Token Auth (traditional login) ---
 			const accessToken = CookieUtils.getCookie(req, "accessToken");
 
 			if (!accessToken) {

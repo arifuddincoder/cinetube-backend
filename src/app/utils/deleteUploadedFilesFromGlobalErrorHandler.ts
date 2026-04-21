@@ -9,7 +9,6 @@ export const deleteUploadedFilesFromGlobalErrorHandler = async (req: Request) =>
 		if (req.file && req.file?.path) {
 			filesToDelete.push(req.file.path);
 		} else if (req.files && typeof req.files === "object" && !Array.isArray(req.files)) {
-			// [ [{path : "rfrf"}] , [{}, {}]]
 			Object.values(req.files).forEach((fileArray) => {
 				if (Array.isArray(fileArray)) {
 					fileArray.forEach((file) => {
