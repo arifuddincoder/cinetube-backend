@@ -7,6 +7,8 @@ export const updateUserZodSchema = z.object({
 		.min(3, "Name must be at least 3 characters")
 		.max(50, "Name must be at most 50 characters")
 		.optional(),
+	image: z.string().url().optional(),
+	imagePublicId: z.string().optional(),
 });
 
 export const changeEmailZodSchema = z.object({

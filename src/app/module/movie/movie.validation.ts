@@ -20,7 +20,8 @@ export const createMovieZodSchema = z.object({
 		.string("Director must be a string")
 		.min(2, "Director name must be at least 2 characters")
 		.max(100, "Director name must be at most 100 characters"),
-	posterImage: z.string().optional(),
+	posterImage: z.string().url("Poster image must be a valid URL").optional(),
+	posterPublicId: z.string().optional(),
 	trailerUrl: z.url("Trailer URL must be a valid URL").optional(),
 	streamingUrl: z.url("Streaming URL must be a valid URL").optional(),
 	pricingType: z
@@ -56,6 +57,7 @@ export const updateMovieZodSchema = z.object({
 		.max(100, "Director name must be at most 100 characters")
 		.optional(),
 	posterImage: z.string().url("Poster image must be a valid URL").optional().nullable(),
+	posterPublicId: z.string().optional().nullable(),
 	trailerUrl: z.url("Trailer URL must be a valid URL").optional(),
 	streamingUrl: z.url("Streaming URL must be a valid URL").optional(),
 	pricingType: z

@@ -67,7 +67,7 @@ const updateMyProfile = async (user: IRequestUser, payload: IUpdateUserPayload) 
 	}
 
 	if (payload.image && isUserExist.image && payload.image !== isUserExist.image) {
-		await deleteFileFromCloudinary(isUserExist.image);
+		await deleteFileFromCloudinary(isUserExist.imagePublicId || isUserExist.image);
 	}
 
 	const updated = await prisma.user.update({
@@ -75,6 +75,7 @@ const updateMyProfile = async (user: IRequestUser, payload: IUpdateUserPayload) 
 		data: {
 			name: payload.name,
 			image: payload.image,
+			imagePublicId: payload.imagePublicId,
 		},
 		select: {
 			id: true,

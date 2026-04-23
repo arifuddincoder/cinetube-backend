@@ -34,6 +34,7 @@ const createMovie = catchAsync(async (req: Request, res: Response) => {
 	const payload = {
 		...req.body,
 		posterImage: req.body.posterImage,
+		posterPublicId: req.body.posterPublicId,
 	};
 
 	const result = await MovieService.createMovie(payload);
@@ -52,6 +53,7 @@ const updateMovie = catchAsync(async (req: Request, res: Response) => {
 	const payload = {
 		...req.body,
 		posterImage: req.body.posterImage,
+		posterPublicId: req.body.posterPublicId,
 	};
 
 	const result = await MovieService.updateMovie(id as string, payload);

@@ -1,6 +1,7 @@
 export interface IUpdateUserPayload {
 	name?: string;
 	image?: string;
+	imagePublicId?: string;
 }
 
 export interface IChangeEmailPayload {

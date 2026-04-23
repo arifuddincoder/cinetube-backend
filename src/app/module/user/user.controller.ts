@@ -36,6 +36,7 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 	const payload = {
 		...req.body,
 		image: req.body.image,
+		imagePublicId: req.body.imagePublicId,
 	};
 
 	const result = await UserService.updateMyProfile(user, payload);

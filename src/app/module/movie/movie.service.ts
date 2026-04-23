@@ -288,7 +288,7 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 	const pricingType = updatedRentPrice === 0 && updatedBuyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
 
 	if (movieData.posterImage && isMovieExist.posterImage && movieData.posterImage !== isMovieExist.posterImage) {
-		await deleteFileFromCloudinary(isMovieExist.posterImage);
+		await deleteFileFromCloudinary(isMovieExist.posterPublicId || isMovieExist.posterImage);
 	}
 
 	const movie = await prisma.$transaction(async (tx) => {

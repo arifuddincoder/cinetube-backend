@@ -78,6 +78,11 @@ export const auth = betterAuth({
 				required: true,
 				defaultValue: false,
 			},
+			imagePublicId: {
+				type: "string",
+				required: false,
+				defaultValue: null,
+			},
 			isDeleted: {
 				type: "boolean",
 				required: true,

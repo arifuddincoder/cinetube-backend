@@ -46,22 +46,39 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 	});
 };
 
-export const deleteFileFromCloudinary = async (url: string) => {
+export const deleteFileFromCloudinary = async (urlOrPublicId: string) => {
 	try {
-		const regex = /\/(?:image|raw)\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?$/;
-		const match = url.match(regex);
-
-		if (!match?.[1]) {
-			throw new AppError(status.BAD_REQUEST, "Invalid Cloudinary URL");
+		if (!urlOrPublicId) {
+			throw new AppError(status.BAD_REQUEST, "Cloudinary file reference is required");
 		}
 
-		const publicId = match[1];
-		const isPdf = url.includes("/raw/upload/");
+		const isUrl = urlOrPublicId.startsWith("http://") || urlOrPublicId.startsWith("https://");
+		const isPdf = isUrl ? urlOrPublicId.includes("/raw/upload/") : false;
 
-		await cloudinary.uploader.destroy(publicId, {
+		let publicId = urlOrPublicId;
+
+		if (isUrl) {
+			const regex = /\/(?:image|raw)\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?$/;
+			const match = urlOrPublicId.match(regex);
+
+			if (!match?.[1]) {
+				throw new AppError(status.BAD_REQUEST, "Invalid Cloudinary URL");
+			}
+
+			publicId = match[1];
+		}
+
+		const result = await cloudinary.uploader.destroy(publicId, {
 			resource_type: isPdf ? "raw" : "image",
 		});
-	} catch {
+
+		if (result.result !== "ok" && result.result !== "not found") {
+			throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to delete file from Cloudinary");
+		}
+
+		return result;
+	} catch (error) {
+		console.error("Cloudinary delete error:", error);
 		throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to delete file from Cloudinary");
 	}
 };

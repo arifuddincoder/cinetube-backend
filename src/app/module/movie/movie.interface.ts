@@ -6,6 +6,7 @@ export interface ICreateMoviePayload {
 	releaseYear: number;
 	director: string;
 	posterImage?: string;
+	posterPublicId?: string;
 	trailerUrl?: string;
 	streamingUrl?: string;
 	pricingType?: PricingType;
@@ -24,6 +25,7 @@ export interface IUpdateMoviePayload {
 	releaseYear?: number;
 	director?: string;
 	posterImage?: string;
+	posterPublicId?: string;
 	trailerUrl?: string;
 	streamingUrl?: string;
 	pricingType?: PricingType;
