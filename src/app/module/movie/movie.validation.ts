@@ -55,7 +55,7 @@ export const updateMovieZodSchema = z.object({
 		.min(2, "Director name must be at least 2 characters")
 		.max(100, "Director name must be at most 100 characters")
 		.optional(),
-	posterImage: z.string().optional(),
+	posterImage: z.string().url("Poster image must be a valid URL").optional().nullable(),
 	trailerUrl: z.url("Trailer URL must be a valid URL").optional(),
 	streamingUrl: z.url("Streaming URL must be a valid URL").optional(),
 	pricingType: z
@@ -69,8 +69,5 @@ export const updateMovieZodSchema = z.object({
 	genreIds: stringOrArray.optional(),
 	platformIds: stringOrArray.optional(),
 	castMemberIds: stringOrArray.optional(),
-	isFeatured: z
-		.string()
-		.transform((val) => val === "true" || val === "1")
-		.optional(),
+	isFeatured: z.coerce.boolean().optional(),
 });

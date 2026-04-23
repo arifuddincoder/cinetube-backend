@@ -4,7 +4,6 @@ import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { MovieController } from "./movie.controller";
 import { createMovieZodSchema, updateMovieZodSchema } from "./movie.validation";
-import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
@@ -16,7 +15,6 @@ router.get("/:id", MovieController.getMovieById);
 router.post(
 	"/",
 	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-	multerUpload.single("file"),
 	validateRequest(createMovieZodSchema),
 	MovieController.createMovie,
 );
@@ -24,7 +22,6 @@ router.post(
 router.patch(
 	"/:id",
 	checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-	multerUpload.single("file"),
 	validateRequest(updateMovieZodSchema),
 	MovieController.updateMovie,
 );

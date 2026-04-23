@@ -16,18 +16,18 @@ import { handleZodError } from "../errorHelpers/handleZodError";
 import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
 import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFilesFromGlobalErrorHandler";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const globalErrorHandler = async (err: any, req: Request, res: Response, next: NextFunction) => {
+export const globalErrorHandler = async (err: unknown, req: Request, res: Response, next: NextFunction) => {
 	if (envVars.NODE_ENV === "development") {
 		console.log("Error from Global Error Handler", err);
 	}
 
-	await deleteUploadedFilesFromGlobalErrorHandler(req);
+	const uploadedFileUrls = (res.locals.uploadedFileUrls as string[] | undefined) || [];
+	await deleteUploadedFilesFromGlobalErrorHandler(uploadedFileUrls);
 
 	let errorSources: TErrorSources[] = [];
 	let statusCode: number = status.INTERNAL_SERVER_ERROR;
-	let message: string = "Internal Server Error";
-	let stack: string | undefined = undefined;
+	let message = "Internal Server Error";
+	let stack: string | undefined;
 
 	if (err instanceof Prisma.PrismaClientKnownRequestError) {
 		const simplifiedError = handlePrismaClientKnownRequestError(err);
@@ -76,7 +76,6 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
 			},
 		];
 	} else if (err instanceof Error) {
-		statusCode = status.INTERNAL_SERVER_ERROR;
 		message = err.message;
 		stack = err.stack;
 		errorSources = [
@@ -89,7 +88,7 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
 
 	const errorResponse: TErrorResponse = {
 		success: false,
-		message: message,
+		message,
 		errorSources,
 		error: envVars.NODE_ENV === "development" ? err : undefined,
 		stack: envVars.NODE_ENV === "development" ? stack : undefined,

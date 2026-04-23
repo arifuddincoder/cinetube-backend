@@ -7,12 +7,17 @@ import AppError from "../errorHelpers/AppError";
 import { prisma } from "../lib/prisma";
 import { CookieUtils } from "../utils/cookie";
 import { jwtUtils } from "../utils/jwt";
+import { COOKIE_NAMES } from "../utils/cookie.constants";
 
 export const checkAuth =
 	(...authRoles: Role[]) =>
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const sessionToken = CookieUtils.getCookie(req, "better-auth.session_token");
+			const sessionToken = CookieUtils.getCookie(req, COOKIE_NAMES.SESSION_TOKEN);
+			const accessToken = CookieUtils.getCookie(req, COOKIE_NAMES.ACCESS_TOKEN);
+
+			console.log("cookies:", req.cookies);
+			console.log("cookie header:", req.headers.cookie);
 
 			if (sessionToken) {
 				const sessionExists = await prisma.session.findFirst({
@@ -59,8 +64,6 @@ export const checkAuth =
 					return next();
 				}
 			}
-
-			const accessToken = CookieUtils.getCookie(req, "accessToken");
 
 			if (!accessToken) {
 				throw new AppError(status.UNAUTHORIZED, "Unauthorized access! No token provided.");

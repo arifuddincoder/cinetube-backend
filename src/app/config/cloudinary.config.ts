@@ -14,7 +14,8 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 		throw new AppError(status.BAD_REQUEST, "File buffer and file name are required for upload");
 	}
 
-	const extension = fileName.split(".").pop()?.toLocaleLowerCase();
+	const extension = fileName.split(".").pop()?.toLowerCase();
+	const isPdf = extension === "pdf";
 
 	const fileNameWithoutExtension = fileName
 		.split(".")
@@ -22,29 +23,23 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 		.join(".")
 		.toLowerCase()
 		.replace(/\s+/g, "-")
-		// eslint-disable-next-line no-useless-escape
-		.replace(/[^a-z0-9\-]/g, "");
+		.replace(/[^a-z0-9-]/g, "");
 
-	const uniqueName = Math.random().toString(36).substring(2) + "-" + Date.now() + "-" + fileNameWithoutExtension;
-
-	const folder = extension === "pdf" ? "pdfs" : "images";
+	const uniqueName = `${Math.random().toString(36).slice(2)}-${Date.now()}-${fileNameWithoutExtension}`;
+	const publicId = `cinetube/${isPdf ? "pdfs" : "images"}/${uniqueName}`;
 
 	return new Promise((resolve, reject) => {
 		cloudinary.uploader
 			.upload_stream(
 				{
-					resource_type: extension === "pdf" ? "raw" : "image",
-					public_id: `cinetube/${folder}/${uniqueName}`,
-					folder: `cinetube/${folder}`,
-					type: "upload",
-					access_mode: "public",
-					...(extension === "pdf" && { format: "pdf" }),
+					resource_type: isPdf ? "raw" : "image",
+					public_id: publicId,
 				},
 				(error, result) => {
-					if (error) {
+					if (error || !result) {
 						return reject(new AppError(status.INTERNAL_SERVER_ERROR, "Failed to upload file to Cloudinary"));
 					}
-					resolve(result as UploadApiResponse);
+					resolve(result);
 				},
 			)
 			.end(buffer);
@@ -53,21 +48,20 @@ export const uploadFileToCloudinary = async (buffer: Buffer, fileName: string): 
 
 export const deleteFileFromCloudinary = async (url: string) => {
 	try {
-		const regex = /\/v\d+\/(.+?)(?:\.[a-zA-Z0-9]+)+$/;
-
+		const regex = /\/(?:image|raw)\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?$/;
 		const match = url.match(regex);
 
-		if (match && match[1]) {
-			const publicId = match[1];
-
-			await cloudinary.uploader.destroy(publicId, {
-				resource_type: "image",
-			});
-
-			console.log(`File ${publicId} deleted from cloudinary`);
+		if (!match?.[1]) {
+			throw new AppError(status.BAD_REQUEST, "Invalid Cloudinary URL");
 		}
-	} catch (error) {
-		console.error("Error deleting file from Cloudinary:", error);
+
+		const publicId = match[1];
+		const isPdf = url.includes("/raw/upload/");
+
+		await cloudinary.uploader.destroy(publicId, {
+			resource_type: isPdf ? "raw" : "image",
+		});
+	} catch {
 		throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to delete file from Cloudinary");
 	}
 };

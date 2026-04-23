@@ -66,7 +66,7 @@ const updateMyProfile = async (user: IRequestUser, payload: IUpdateUserPayload) 
 		throw new AppError(status.NOT_FOUND, "User not found");
 	}
 
-	if (payload.image && isUserExist.image) {
+	if (payload.image && isUserExist.image && payload.image !== isUserExist.image) {
 		await deleteFileFromCloudinary(isUserExist.image);
 	}
 
@@ -229,6 +229,7 @@ const deleteUser = async (id: string, adminUser: IRequestUser) => {
 
 const hardDeleteUser = async (id: string, adminUser: IRequestUser) => {
 	const { userId: adminUserId } = adminUser;
+
 	const user = await prisma.user.findUnique({
 		where: { id },
 	});
@@ -236,15 +237,19 @@ const hardDeleteUser = async (id: string, adminUser: IRequestUser) => {
 	if (!user) {
 		throw new AppError(status.NOT_FOUND, "User not found");
 	}
+
 	if (user.role === Role.SUPER_ADMIN) {
 		throw new AppError(status.FORBIDDEN, "Cannot delete super admin");
 	}
-	if (user.image) {
-		await deleteFileFromCloudinary(user.image);
-	}
+
 	if (user.id === adminUserId) {
 		throw new AppError(status.BAD_REQUEST, "You cannot permanently delete yourself");
 	}
+
+	if (user.image) {
+		await deleteFileFromCloudinary(user.image);
+	}
+
 	await prisma.user.delete({
 		where: { id },
 	});

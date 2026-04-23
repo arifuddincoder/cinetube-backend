@@ -5,6 +5,7 @@ import { IQueryParams } from "../../interfaces/query.interface";
 import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { ICreateMoviePayload, IUpdateMoviePayload } from "./movie.interface";
+import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
 
 const getAllMovies = async (query: IQueryParams) => {
 	const {
@@ -286,6 +287,10 @@ const updateMovie = async (id: string, payload: IUpdateMoviePayload) => {
 	const updatedRentDuration = rentDuration ?? isMovieExist.rentDuration;
 	const pricingType = updatedRentPrice === 0 && updatedBuyPrice === 0 ? PricingType.FREE : PricingType.PREMIUM;
 
+	if (movieData.posterImage && isMovieExist.posterImage && movieData.posterImage !== isMovieExist.posterImage) {
+		await deleteFileFromCloudinary(isMovieExist.posterImage);
+	}
+
 	const movie = await prisma.$transaction(async (tx) => {
 		const updatedMovie = await tx.movie.update({
 			where: { id },
@@ -369,6 +374,10 @@ const hardDeleteMovie = async (id: string) => {
 
 	if (!isMovieExist.isDeleted) {
 		throw new AppError(status.BAD_REQUEST, "Movie must be soft deleted before permanent deletion");
+	}
+
+	if (isMovieExist.posterImage) {
+		await deleteFileFromCloudinary(isMovieExist.posterImage);
 	}
 
 	const movie = await prisma.movie.delete({

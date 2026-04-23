@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ejs from "ejs";
 import status from "http-status";
 import nodemailer from "nodemailer";
-import path from "path";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
+import { EmailTemplateName } from "./emailHelpers";
+import { getEmailTemplate } from "./emailTemplates";
 
 const transporter = nodemailer.createTransport({
 	host: envVars.EMAIL_SENDER.SMTP_HOST,
@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 interface SendEmailOptions {
 	to: string;
 	subject: string;
-	templateName: string;
+	templateName: EmailTemplateName;
 	templateData: Record<string, any>;
 	attachments?: {
 		filename: string;
@@ -30,15 +30,13 @@ interface SendEmailOptions {
 
 export const sendEmail = async ({ subject, templateData, templateName, to, attachments }: SendEmailOptions) => {
 	try {
-		const templatePath = path.resolve(process.cwd(), `src/app/templates/${templateName}.ejs`);
-
-		const html = await ejs.renderFile(templatePath, templateData);
+		const html = getEmailTemplate(templateName, templateData);
 
 		const info = await transporter.sendMail({
 			from: envVars.EMAIL_SENDER.SMTP_FROM,
-			to: to,
-			subject: subject,
-			html: html,
+			to,
+			subject,
+			html,
 			attachments: attachments?.map((attachment) => ({
 				filename: attachment.filename,
 				content: attachment.content,

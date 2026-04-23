@@ -9,7 +9,6 @@ import {
 	changeUserStatusZodSchema,
 	changeUserRoleZodSchema,
 } from "./user.validation";
-import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
@@ -34,7 +33,6 @@ router.get("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), UserController.getUs
 router.patch(
 	"/update-profile",
 	checkAuth(Role.USER, Role.ADMIN, Role.SUPER_ADMIN),
-	multerUpload.single("file"),
 	validateRequest(updateUserZodSchema),
 	UserController.updateMyProfile,
 );

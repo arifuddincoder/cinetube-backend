@@ -4,11 +4,12 @@ import { envVars } from "../config/env";
 import { CookieUtils } from "../utils/cookie";
 import { jwtUtils } from "../utils/jwt";
 import { Role } from "../../generated/prisma/enums";
+import { COOKIE_NAMES } from "../utils/cookie.constants";
 
 export const optionalCheckAuth = async (req: Request, _res: Response, next: NextFunction) => {
 	try {
-		const sessionToken = CookieUtils.getCookie(req, "better-auth.session_token");
-		const accessToken = CookieUtils.getCookie(req, "accessToken");
+		const sessionToken = CookieUtils.getCookie(req, COOKIE_NAMES.SESSION_TOKEN);
+		const accessToken = CookieUtils.getCookie(req, COOKIE_NAMES.ACCESS_TOKEN);
 
 		if (accessToken) {
 			const verified = jwtUtils.verifyToken(accessToken, envVars.ACCESS_TOKEN_SECRET);

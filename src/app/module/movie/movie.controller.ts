@@ -31,13 +31,13 @@ const getMovieById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const createMovie = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
-
-	if (req.file) {
-		payload.posterImage = (req.file as any).path;
-	}
+	const payload = {
+		...req.body,
+		posterImage: req.body.posterImage,
+	};
 
 	const result = await MovieService.createMovie(payload);
+
 	sendResponse(res, {
 		httpStatusCode: status.CREATED,
 		success: true,
@@ -48,13 +48,14 @@ const createMovie = catchAsync(async (req: Request, res: Response) => {
 
 const updateMovie = catchAsync(async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const payload = req.body;
 
-	if (req.file) {
-		payload.posterImage = (req.file as any).path;
-	}
+	const payload = {
+		...req.body,
+		posterImage: req.body.posterImage,
+	};
 
 	const result = await MovieService.updateMovie(id as string, payload);
+
 	sendResponse(res, {
 		httpStatusCode: status.OK,
 		success: true,
