@@ -120,6 +120,46 @@ const getReviewsByMovie = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
+
+const getAllReviewsForAdmin = catchAsync(async (req, res) => {
+	const result = await ReviewService.getAllReviewsForAdmin(req.query);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Reviews retrieved successfully",
+		data: result.data,
+		meta: result.meta,
+	});
+});
+
+const getMyReviewForMovie = catchAsync(async (req, res) => {
+	const user = req.user;
+	const { movieId } = req.params;
+
+	const result = await ReviewService.getMyReviewForMovie(user, movieId);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "My review retrieved successfully",
+		data: result,
+	});
+});
+
+const getPendingReviewsForMovie = catchAsync(async (req, res) => {
+	const { movieId } = req.params;
+
+	const result = await ReviewService.getPendingReviewsForMovie(movieId);
+
+	sendResponse(res, {
+		httpStatusCode: status.OK,
+		success: true,
+		message: "Pending reviews retrieved successfully",
+		data: result,
+	});
+});
+
 export const ReviewController = {
 	getAllReviews,
 	getMyReviews,
@@ -130,4 +170,7 @@ export const ReviewController = {
 	updateReviewStatus,
 	deleteReview,
 	getReviewsByMovie,
+	getAllReviewsForAdmin,
+	getMyReviewForMovie,
+	getPendingReviewsForMovie,
 };

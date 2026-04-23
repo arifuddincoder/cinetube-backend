@@ -1,11 +1,38 @@
 import status from "http-status";
-import { ReviewStatus } from "../../../generated/prisma/enums";
+import { ReviewStatus, Role } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { IQueryParams } from "../../interfaces/query.interface";
 import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { ICreateReviewPayload, IUpdateReviewPayload, IUpdateReviewStatusPayload } from "./review.interface";
+import { Prisma } from "../../../generated/prisma/client";
+
+const reviewInclude = {
+	user: {
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			image: true,
+		},
+	},
+	tags: {
+		include: {
+			tag: true,
+		},
+	},
+	_count: {
+		select: {
+			comments: true,
+		},
+	},
+	likes: {
+		select: {
+			userId: true,
+		},
+	},
+} satisfies Prisma.ReviewInclude;
 
 const getAllReviews = async (query: IQueryParams) => {
 	const result = await new QueryBuilder(prisma.review, query, {
@@ -311,12 +338,20 @@ const deleteReview = async (user: IRequestUser, id: string) => {
 		throw new AppError(status.NOT_FOUND, "Review not found");
 	}
 
-	if (isReviewExist.userId !== user.userId) {
+	const isAdmin = user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN;
+	const isOwner = isReviewExist.userId === user.userId;
+
+	if (!isAdmin && !isOwner) {
 		throw new AppError(status.FORBIDDEN, "You are not allowed to delete this review");
 	}
 
-	if (isReviewExist.status !== ReviewStatus.DRAFT && isReviewExist.status !== ReviewStatus.PENDING) {
-		throw new AppError(status.BAD_REQUEST, "Only draft or pending reviews can be deleted");
+	if (
+		!isAdmin &&
+		isReviewExist.status !== ReviewStatus.DRAFT &&
+		isReviewExist.status !== ReviewStatus.PENDING &&
+		isReviewExist.status !== ReviewStatus.UNPUBLISHED
+	) {
+		throw new AppError(status.BAD_REQUEST, "You can delete only draft, pending, or unpublished reviews");
 	}
 
 	const review = await prisma.review.update({
@@ -352,6 +387,100 @@ const getReviewsByMovie = async (movieId: string, query: IQueryParams, currentUs
 
 	return { ...result, data };
 };
+
+const getAllReviewsForAdmin = async (query: Record<string, any>) => {
+	const page = Number(query.page) || 1;
+	const limit = Number(query.limit) || 10;
+	const skip = (page - 1) * limit;
+	const searchTerm = query.searchTerm || query.search || "";
+
+	const where: Prisma.ReviewWhereInput = {
+		isDeleted: false,
+		...(searchTerm
+			? {
+					OR: [
+						{ content: { contains: searchTerm, mode: "insensitive" } },
+						{ user: { name: { contains: searchTerm, mode: "insensitive" } } },
+						{ user: { email: { contains: searchTerm, mode: "insensitive" } } },
+						{ movie: { title: { contains: searchTerm, mode: "insensitive" } } },
+					],
+				}
+			: {}),
+	};
+
+	const [data, total] = await Promise.all([
+		prisma.review.findMany({
+			where,
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+				reviewTags: {
+					include: {
+						tag: true,
+					},
+				},
+				movie: {
+					select: {
+						id: true,
+						title: true,
+					},
+				},
+			},
+			orderBy: { createdAt: "desc" },
+			skip,
+			take: limit,
+		}),
+		prisma.review.count({ where }),
+	]);
+
+	return {
+		data,
+		meta: {
+			page,
+			limit,
+			total,
+			totalPage: Math.ceil(total / limit),
+		},
+	};
+};
+
+const getMyReviewForMovie = async (user: IRequestUser, movieId: string) => {
+	const review = await prisma.review.findFirst({
+		where: {
+			movieId,
+			userId: user.userId,
+			isDeleted: false,
+		},
+		include: reviewInclude,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return review;
+};
+
+const getPendingReviewsForMovie = async (movieId: string) => {
+	const reviews = await prisma.review.findMany({
+		where: {
+			movieId,
+			status: ReviewStatus.PENDING,
+			isDeleted: false,
+		},
+		include: reviewInclude,
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return reviews;
+};
+
 export const ReviewService = {
 	getAllReviews,
 	getMyReviews,
@@ -362,4 +491,8 @@ export const ReviewService = {
 	updateReviewStatus,
 	deleteReview,
 	getReviewsByMovie,
+
+	getAllReviewsForAdmin,
+	getMyReviewForMovie,
+	getPendingReviewsForMovie,
 };
