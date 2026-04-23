@@ -9,7 +9,6 @@ import { sendResponse } from "../../shared/sendResponse";
 import { CookieUtils } from "../../utils/cookie";
 import { tokenUtils } from "../../utils/token";
 import { AuthService } from "./auth.service";
-import { toWebHeaders } from "../../utils/toWebHeaders";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
