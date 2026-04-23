@@ -9,6 +9,7 @@ import { sendResponse } from "../../shared/sendResponse";
 import { CookieUtils } from "../../utils/cookie";
 import { tokenUtils } from "../../utils/token";
 import { AuthService } from "./auth.service";
+import { toWebHeaders } from "../../utils/toWebHeaders";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -187,22 +188,60 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const googleLogin = catchAsync((req: Request, res: Response) => {
-	const redirectPath = req.query.redirect || "/dashboard";
+	const redirectPath = (req.query.redirect as string) || "/dashboard";
 
-	const encodedRedirectPath = encodeURIComponent(redirectPath as string);
+	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodeURIComponent(
+		redirectPath,
+	)}`;
 
-	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodedRedirectPath}`;
+	const html = `
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<title>Redirecting...</title>
+		</head>
+		<body>
+			<p>Redirecting to Google...</p>
+			<script>
+				window.onload = async function () {
+					try {
+						const response = await fetch("${envVars.BETTER_AUTH_URL}/api/auth/sign-in/social", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							credentials: "include",
+							body: JSON.stringify({
+								provider: "google",
+								callbackURL: "${callbackURL}"
+							})
+						});
 
-	res.render("googleRedirect", {
-		callbackURL: callbackURL,
-		betterAuthUrl: envVars.BETTER_AUTH_URL,
-	});
+						const data = await response.json();
+
+						if (data?.url) {
+							window.location.href = data.url;
+						} else {
+							window.location.href = "${envVars.FRONTEND_URL}/login?error=oauth_failed";
+						}
+					} catch (error) {
+						window.location.href = "${envVars.FRONTEND_URL}/login?error=oauth_failed";
+					}
+				};
+			</script>
+		</body>
+		</html>
+	`;
+
+	res.status(200).send(html);
 });
 
 const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
 	const redirectPath = (req.query.redirect as string) || "/dashboard";
 
-	const sessionToken = req.cookies["better-auth.session_token"];
+	const sessionToken = req.cookies["better-auth.session_token"] || req.cookies["__Secure-better-auth.session_token"];
 
 	if (!sessionToken) {
 		return res.redirect(`${envVars.FRONTEND_URL}/login?error=oauth_failed`);
@@ -218,21 +257,23 @@ const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
 		return res.redirect(`${envVars.FRONTEND_URL}/login?error=no_session_found`);
 	}
 
-	if (session && !session.user) {
+	if (!session.user) {
 		return res.redirect(`${envVars.FRONTEND_URL}/login?error=no_user_found`);
 	}
 
 	const result = await AuthService.googleLoginSuccess(session);
-
 	const { accessToken, refreshToken } = result;
-
-	tokenUtils.setAccessTokenCookie(res, accessToken);
-	tokenUtils.setRefreshTokenCookie(res, refreshToken);
 
 	const isValidRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//");
 	const finalRedirectPath = isValidRedirectPath ? redirectPath : "/dashboard";
 
-	res.redirect(`${envVars.FRONTEND_URL}${finalRedirectPath}`);
+	const callbackUrl =
+		`${envVars.FRONTEND_URL}/auth/google/callback` +
+		`?accessToken=${encodeURIComponent(accessToken)}` +
+		`&refreshToken=${encodeURIComponent(refreshToken)}` +
+		`&redirect=${encodeURIComponent(finalRedirectPath)}`;
+
+	return res.redirect(callbackUrl);
 });
 
 const handleOAuthError = catchAsync((req: Request, res: Response) => {

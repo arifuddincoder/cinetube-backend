@@ -8,8 +8,8 @@ import { sendEmail } from "../utils/email";
 import { COOKIE_NAMES } from "../utils/cookie.constants";
 
 export const auth = betterAuth({
-	baseURL: envVars.FRONTEND_URL,
-	trustedOrigins: [envVars.FRONTEND_URL!, envVars.BETTER_AUTH_URL!],
+	baseURL: envVars.BETTER_AUTH_URL,
+	trustedOrigins: [envVars.FRONTEND_URL, envVars.BETTER_AUTH_URL],
 	secret: envVars.BETTER_AUTH_SECRET,
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",
