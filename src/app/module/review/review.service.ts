@@ -75,6 +75,7 @@ const getMyReviews = async (user: IRequestUser, query: IQueryParams) => {
 			tags: {
 				include: { tag: true },
 			},
+			_count: { select: { likes: true, comments: { where: { isDeleted: false } } } },
 			likes: true,
 		})
 		.search()
