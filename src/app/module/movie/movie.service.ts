@@ -125,6 +125,7 @@ const getMovieById = async (id: string) => {
 			_count: {
 				select: {
 					watchlists: true,
+					platforms: true,
 				},
 			},
 			platforms: {
@@ -156,6 +157,16 @@ const getMovieById = async (id: string) => {
 						},
 					},
 					likes: true,
+					_count: {
+						select: {
+							likes: true,
+							comments: {
+								where: {
+									isDeleted: false,
+								},
+							},
+						},
+					},
 					comments: {
 						where: {
 							isDeleted: false,
@@ -194,24 +205,40 @@ const getMovieById = async (id: string) => {
 		throw new AppError(status.NOT_FOUND, "Movie not found");
 	}
 
-	const avgRating = await prisma.review.aggregate({
-		where: {
-			movieId: id,
-			status: "PUBLISHED",
-			isDeleted: false,
-		},
-		_avg: {
-			rating: true,
-		},
-		_count: {
-			rating: true,
-		},
-	});
+	const [avgRating, totalComments] = await Promise.all([
+		prisma.review.aggregate({
+			where: {
+				movieId: id,
+				status: "PUBLISHED",
+				isDeleted: false,
+			},
+			_avg: {
+				rating: true,
+			},
+			_count: {
+				rating: true,
+			},
+		}),
+
+		prisma.comment.count({
+			where: {
+				isDeleted: false,
+				review: {
+					movieId: id,
+					isDeleted: false,
+					status: "PUBLISHED",
+				},
+			},
+		}),
+	]);
 
 	return {
 		...movie,
 		averageRating: avgRating._avg.rating ?? 0,
 		totalReviews: avgRating._count.rating,
+		totalComments,
+		totalWatchlists: movie._count.watchlists,
+		totalPlatforms: movie._count.platforms,
 	};
 };
 
