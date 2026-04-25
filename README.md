@@ -26,7 +26,7 @@
 
 | Role  | Email                      | Password  |
 | ----- | -------------------------- | --------- |
-| Admin | shuvombstu2013@gmail.com   | Pa$$w0rd! |
+| Admin | shuvombstu2011@gmail.com   | Pa$$w0rd! |
 | User  | samiha.tasnim@example.com  | Pa$$w0rd! |
 
 ---
