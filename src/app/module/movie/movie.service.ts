@@ -125,7 +125,6 @@ const getMovieById = async (id: string) => {
 			_count: {
 				select: {
 					watchlists: true,
-					platforms: true,
 				},
 			},
 			platforms: {
@@ -238,7 +237,6 @@ const getMovieById = async (id: string) => {
 		totalReviews: avgRating._count.rating,
 		totalComments,
 		totalWatchlists: movie._count.watchlists,
-		totalPlatforms: movie._count.platforms,
 	};
 };
 
