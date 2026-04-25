@@ -9,3 +9,4 @@ dist
 /src/generated
 .vercel
 .env*.local
+.env.example
