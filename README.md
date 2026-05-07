@@ -17,8 +17,8 @@
 
 | Repository         | Link                                              |
 | ------------------ | ------------------------------------------------- |
-| Frontend (Next.js) | https://github.com/shuvo2011/cinetube-frontend    |
-| Backend (Express)  | https://github.com/shuvo2011/cinetube-backend     |
+| Frontend (Next.js) | https://github.com/arifuddincoder/cinetube-frontend    |
+| Backend (Express)  | https://github.com/arifuddincoder/cinetube-backend     |
 
 ---
 
