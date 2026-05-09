@@ -120,15 +120,6 @@ export const auth = betterAuth({
 					path: "/",
 				},
 			},
-			state: {
-				name: COOKIE_NAMES.STATE,
-				attributes: {
-					httpOnly: true,
-					secure: true,
-					sameSite: "lax", // ✅
-					path: "/",
-				},
-			},
 		},
 	},
 
