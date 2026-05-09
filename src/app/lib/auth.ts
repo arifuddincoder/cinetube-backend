@@ -132,7 +132,6 @@ export const auth = betterAuth({
 
 	plugins: [
 		bearer(),
-		oAuthProxy(),
 		emailOTP({
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP({ email, otp, type }) {
