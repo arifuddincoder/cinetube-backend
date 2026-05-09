@@ -13,9 +13,7 @@ import { PaymentController } from "./app/module/payment/payment.controller";
 const app: Application = express();
 app.set("query parser", (str: string) => qs.parse(str));
 
-app.use("/api/auth", toNodeHandler(auth));
-app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
-
+// CORS আগে
 app.use(
 	cors({
 		origin: [envVars.FRONTEND_URL, "http://localhost:3000"],
@@ -25,6 +23,11 @@ app.use(
 	}),
 );
 
+// তারপর Better Auth
+app.use("/api/auth", toNodeHandler(auth));
+
+app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -33,5 +36,3 @@ app.use("/api/v1", IndexRoutes);
 
 app.use(globalErrorHandler);
 app.use(notFound);
-
-export default app;
