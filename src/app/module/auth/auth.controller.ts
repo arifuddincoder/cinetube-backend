@@ -187,7 +187,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const googleLogin = catchAsync((req: Request, res: Response) => {
-	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`;
+	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/auth/callback/google`;
 
 	const html = `
 		<!DOCTYPE html>
@@ -199,32 +199,12 @@ const googleLogin = catchAsync((req: Request, res: Response) => {
 		</head>
 		<body>
 			<p>Redirecting to Google...</p>
+			<form id="googleForm" method="POST" action="${envVars.BETTER_AUTH_URL}/api/auth/sign-in/social">
+				<input type="hidden" name="provider" value="google" />
+				<input type="hidden" name="callbackURL" value="${callbackURL}" />
+			</form>
 			<script>
-				window.onload = async function () {
-					try {
-						const response = await fetch("${envVars.BETTER_AUTH_URL}/api/auth/sign-in/social", {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json"
-							},
-							credentials: "include",
-							body: JSON.stringify({
-								provider: "google",
-								callbackURL: "${callbackURL}"
-							})
-						});
-
-						const data = await response.json();
-
-						if (data?.url) {
-							window.location.href = data.url;
-						} else {
-							window.location.href = "${envVars.FRONTEND_URL}/login?error=oauth_failed";
-						}
-					} catch (error) {
-						window.location.href = "${envVars.FRONTEND_URL}/login?error=oauth_failed";
-					}
-				};
+				document.getElementById('googleForm').submit();
 			</script>
 		</body>
 		</html>
