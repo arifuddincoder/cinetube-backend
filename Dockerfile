@@ -35,7 +35,7 @@ ENV NODE_ENV=production
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 RUN pnpm install --frozen-lockfile
-RUN pnpm generate -- --schema=./prisma/schema
+RUN pnpm generate -- --schema=./prisma/schema/schema.prisma
 
 COPY --from=builder /app/dist ./dist
 
