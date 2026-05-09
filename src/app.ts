@@ -36,3 +36,5 @@ app.use("/api/v1", IndexRoutes);
 
 app.use(globalErrorHandler);
 app.use(notFound);
+
+export default app;
