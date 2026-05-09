@@ -220,9 +220,14 @@ const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
 		return res.redirect(`${envVars.FRONTEND_URL}/login?error=oauth_failed`);
 	}
 
+	// ✅ এটা fix করো
+	const cookieName = req.cookies["__Secure-better-auth.session_token"]
+		? "__Secure-better-auth.session_token"
+		: "better-auth.session_token";
+
 	const session = await auth.api.getSession({
 		headers: {
-			Cookie: `better-auth.session_token=${sessionToken}`,
+			cookie: `${cookieName}=${sessionToken}`, // ✅ lowercase "cookie", সঠিক নাম দিয়ে
 		},
 	});
 
