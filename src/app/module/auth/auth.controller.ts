@@ -214,29 +214,29 @@ const googleLogin = catchAsync((req: Request, res: Response) => {
 });
 
 const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
-	const sessionToken = req.cookies["better-auth.session_token"] || req.cookies["__Secure-better-auth.session_token"];
+	// Production এ __Secure- prefix হয়
+	const sessionToken = req.cookies["__Secure-better-auth.session_token"] || req.cookies["better-auth.session_token"];
 
 	if (!sessionToken) {
+		console.log("Available cookies:", Object.keys(req.cookies));
 		return res.redirect(`${envVars.FRONTEND_URL}/login?error=oauth_failed`);
 	}
 
-	// ✅ এটা fix করো
 	const cookieName = req.cookies["__Secure-better-auth.session_token"]
 		? "__Secure-better-auth.session_token"
 		: "better-auth.session_token";
 
 	const session = await auth.api.getSession({
-		headers: {
-			cookie: `${cookieName}=${sessionToken}`, // ✅ lowercase "cookie", সঠিক নাম দিয়ে
-		},
+		headers: new Headers({
+			cookie: `${cookieName}=${sessionToken}`,
+		}),
 	});
 
-	if (!session) {
-		return res.redirect(`${envVars.FRONTEND_URL}/login?error=no_session_found`);
-	}
+	console.log("Available cookies:", Object.keys(req.cookies));
+	console.log("Cookie header:", req.headers.cookie);
 
-	if (!session.user) {
-		return res.redirect(`${envVars.FRONTEND_URL}/login?error=no_user_found`);
+	if (!session?.user) {
+		return res.redirect(`${envVars.FRONTEND_URL}/login?error=no_session_found`);
 	}
 
 	const result = await AuthService.googleLoginSuccess(session);
