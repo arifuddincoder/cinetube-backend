@@ -12,7 +12,7 @@ import { PaymentController } from "./app/module/payment/payment.controller";
 
 const app: Application = express();
 app.set("query parser", (str: string) => qs.parse(str));
-
+app.set("trust proxy", 1);
 // CORS আগে
 app.use(
 	cors({
