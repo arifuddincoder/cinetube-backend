@@ -187,11 +187,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const googleLogin = catchAsync((req: Request, res: Response) => {
-	const redirectPath = (req.query.redirect as string) || "/dashboard";
-
-	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodeURIComponent(
-		redirectPath,
-	)}`;
+	const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`;
 
 	const html = `
 		<!DOCTYPE html>
@@ -238,8 +234,6 @@ const googleLogin = catchAsync((req: Request, res: Response) => {
 });
 
 const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
-	const redirectPath = (req.query.redirect as string) || "/dashboard";
-
 	const sessionToken = req.cookies["better-auth.session_token"] || req.cookies["__Secure-better-auth.session_token"];
 
 	if (!sessionToken) {
@@ -263,14 +257,10 @@ const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
 	const result = await AuthService.googleLoginSuccess(session);
 	const { accessToken, refreshToken } = result;
 
-	const isValidRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//");
-	const finalRedirectPath = isValidRedirectPath ? redirectPath : "/dashboard";
-
 	const callbackUrl =
 		`${envVars.FRONTEND_URL}/auth/google/callback` +
 		`?accessToken=${encodeURIComponent(accessToken)}` +
-		`&refreshToken=${encodeURIComponent(refreshToken)}` +
-		`&redirect=${encodeURIComponent(finalRedirectPath)}`;
+		`&refreshToken=${encodeURIComponent(refreshToken)}`;
 
 	return res.redirect(callbackUrl);
 });
